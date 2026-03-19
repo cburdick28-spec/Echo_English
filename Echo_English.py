@@ -495,10 +495,15 @@ Format:
 
         # Call Anthropic API
         try:
+            api_key = st.secrets["ANTHROPIC_API_KEY"]
             history = [{"role": m["role"], "content": m["content"]} for m in st.session_state.chat_messages]
             response = requests.post(
                 "https://api.anthropic.com/v1/messages",
-                headers={"Content-Type": "application/json"},
+                headers={
+                    "Content-Type": "application/json",
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                },
                 json={
                     "model": "claude-sonnet-4-20250514",
                     "max_tokens": 1000,
