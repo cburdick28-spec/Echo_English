@@ -12,16 +12,11 @@ st.markdown("""
 
 html, body, [class*="css"] { font-family: 'Karla', sans-serif; }
 
-.stApp {
-    background: #f5f0e8;
-    color: #1a1a1a;
-}
+.stApp { background: #f5f0e8; color: #1a1a1a; }
 
-[data-testid="stSidebar"] {
-    background: #1a1a1a !important;
-}
-[data-testid="stSidebar"] * { color: #f5f0e8 !important; }
-[data-testid="stSidebar"] .stRadio label { color: #f5f0e8 !important; }
+/* Hide sidebar entirely */
+[data-testid="stSidebar"] { display: none; }
+[data-testid="collapsedControl"] { display: none; }
 
 h1 {
     font-family: 'Syne', sans-serif !important;
@@ -36,9 +31,64 @@ h2, h3 {
     color: #1a1a1a !important;
 }
 
+/* Sticky nav bar */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    background: #1a1a1a;
+    padding: 12px 40px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-bottom: 0;
+}
+.navbar a {
+    color: #f5f0e8;
+    text-decoration: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+.navbar a:hover { opacity: 1; }
+.navbar-brand {
+    color: #e85d2f !important;
+    opacity: 1 !important;
+    font-size: 1rem !important;
+    margin-right: 16px;
+}
+
+.section-wrap {
+    padding: 64px 48px;
+    border-bottom: 2px solid #d0c8b8;
+}
+.section-wrap:last-child { border-bottom: none; }
+
+.hero-badge {
+    background: #e85d2f;
+    color: white;
+    display: inline-block;
+    padding: 6px 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.divider {
+    border: none;
+    border-top: 2px solid #1a1a1a;
+    margin: 32px 0;
+}
+
 .step-card {
     background: #ffffff;
-    border-radius: 0px;
     border-left: 5px solid #e85d2f;
     padding: 28px 32px;
     margin-bottom: 24px;
@@ -65,47 +115,11 @@ h2, h3 {
 
 .answer-block {
     background: #f5f0e8;
-    border-radius: 0px;
     padding: 14px 18px;
     margin: 10px 0;
     font-size: 0.95rem;
     line-height: 1.6;
     border-bottom: 2px solid #1a1a1a;
-}
-
-.question-label {
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: #888;
-    margin-bottom: 4px;
-}
-
-.pill {
-    display: inline-block;
-    background: #1a1a1a;
-    color: #f5f0e8;
-    border-radius: 0px;
-    padding: 5px 14px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin: 4px 4px 4px 0;
-}
-
-.pill-outline {
-    display: inline-block;
-    border: 2px solid #1a1a1a;
-    color: #1a1a1a;
-    border-radius: 0px;
-    padding: 4px 14px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin: 4px 4px 4px 0;
 }
 
 .big-number {
@@ -120,23 +134,43 @@ h2, h3 {
     right: 20px;
 }
 
-.hero-badge {
-    background: #e85d2f;
-    color: white;
-    display: inline-block;
-    padding: 6px 16px;
-    font-family: 'Syne', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 16px;
+.level-card {
+    background: #fff;
+    border: 2px solid #1a1a1a;
+    padding: 24px 20px;
+    box-shadow: 4px 4px 0px #1a1a1a;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
-.divider {
-    border: none;
-    border-top: 2px solid #1a1a1a;
-    margin: 32px 0;
+.vocab-word {
+    background: #1a1a1a;
+    color: #f5f0e8;
+    display: inline-block;
+    padding: 6px 14px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin: 4px 4px 4px 0;
+}
+
+.phrase-box {
+    background: #f5f0e8;
+    border-left: 4px solid #e85d2f;
+    padding: 12px 16px;
+    margin: 8px 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.lesson-card {
+    background: #fff;
+    border: 2px solid #1a1a1a;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: 3px 3px 0px #1a1a1a;
 }
 
 .competitor-card {
@@ -147,16 +181,6 @@ h2, h3 {
     box-shadow: 3px 3px 0px #1a1a1a;
 }
 
-.check-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    margin: 8px 0;
-    font-size: 0.95rem;
-}
-
-.check-icon { color: #e85d2f; font-weight: 800; font-size: 1rem; margin-top: 1px; }
-
 .reflection-box {
     background: #1a1a1a;
     color: #f5f0e8;
@@ -166,414 +190,415 @@ h2, h3 {
     line-height: 1.7;
     font-style: italic;
 }
+
+div[data-testid="stButton"] button {
+    background: #e85d2f !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 0 !important;
+    font-family: 'Syne', sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    padding: 10px 24px !important;
+    box-shadow: 3px 3px 0px #1a1a1a !important;
+}
+
+[data-testid="stMetricValue"] {
+    font-family: 'Syne', sans-serif !important;
+    font-weight: 800 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# ── Sidebar ───────────────────────────────────────────────────────────────────
-with st.sidebar:
-    st.markdown("### 🔊 Echo English")
-    st.markdown("---")
-    page = st.radio(
-        "Navigate",
-        [
-            "🏠 Overview",
-            "❗ Step 1 – Problem",
-            "🔍 Step 2 – Existing Solutions",
-            "✅ Step 3 – Your Solution",
-            "⚡ Step 4 – Why Better",
-            "🚀 Step 5 – Delivery Plan",
-            "👤 Step 6 – First Customer",
-            "💬 Reflection",
-        ],
-        label_visibility="collapsed",
-    )
-    st.markdown("---")
-    st.markdown("**Creator:** Connor Burdick")
-    st.markdown("**Product:** Echo English")
+# ── Sticky Nav ────────────────────────────────────────────────────────────────
+st.markdown("""
+<div class="navbar">
+  <a class="navbar-brand" href="#home">🔊 Echo English</a>
+  <a href="#about">About</a>
+  <a href="#level-1">Level 1</a>
+  <a href="#level-2">Level 2</a>
+  <a href="#level-3">Level 3</a>
+  <a href="#level-4">Level 4</a>
+  <a href="#level-5">Level 5</a>
+</div>
+""", unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# OVERVIEW
+# HERO / HOME
 # ══════════════════════════════════════════════════════════════════════════════
-if page == "🏠 Overview":
-    st.markdown('<div class="hero-badge">Echo English — Business Concept</div>', unsafe_allow_html=True)
-    st.title("Echo English")
-    st.markdown("##### Helping non-English speakers hold conversations and land jobs — at their own pace, zero ads.")
-    st.markdown('<hr class="divider">', unsafe_allow_html=True)
+st.markdown('<div id="home" class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="hero-badge">Echo English — Learn at Your Pace</div>', unsafe_allow_html=True)
+st.title("Echo English")
+st.markdown("##### Helping non-English speakers hold conversations and land jobs — at their own pace, zero ads.")
+st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("""
-        <div class="step-card" style="position:relative">
-          <div class="big-number">1</div>
-          <div class="step-label">The Problem</div>
-          <div class="step-title">Language Barrier</div>
-          Non-English speakers in English-speaking countries struggle to hold conversations and find employment.
-        </div>""", unsafe_allow_html=True)
-    with col2:
-        st.markdown("""
-        <div class="step-card" style="position:relative">
-          <div class="big-number">2</div>
-          <div class="step-label">The Gap</div>
-          <div class="step-title">Existing Tools Fall Short</div>
-          Duolingo is gamified fluff. Classes are expensive and rigid. No option is truly personalized and free.
-        </div>""", unsafe_allow_html=True)
-    with col3:
-        st.markdown("""
-        <div class="step-card" style="position:relative">
-          <div class="big-number">3</div>
-          <div class="step-label">The Solution</div>
-          <div class="step-title">AI-Driven Platform</div>
-          A website with a built-in AI tutor — personalized lessons, 24/7 access, zero ads, your own pace.
-        </div>""", unsafe_allow_html=True)
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.markdown("""
+    <div class="step-card" style="position:relative">
+      <div class="big-number">1</div>
+      <div class="step-label">The Problem</div>
+      <div class="step-title">Language Barrier</div>
+      Non-English speakers in English-speaking countries struggle to hold conversations and find employment.
+    </div>""", unsafe_allow_html=True)
+with col2:
+    st.markdown("""
+    <div class="step-card" style="position:relative">
+      <div class="big-number">2</div>
+      <div class="step-label">The Solution</div>
+      <div class="step-title">AI-Driven Platform</div>
+      A website with a built-in AI tutor — personalized lessons, 24/7 access, zero ads, your own pace.
+    </div>""", unsafe_allow_html=True)
+with col3:
+    st.markdown("""
+    <div class="step-card" style="position:relative">
+      <div class="big-number">3</div>
+      <div class="step-label">5 Levels</div>
+      <div class="step-title">Your Learning Path</div>
+      From complete beginner to advanced — structured levels so you always know where you stand.
+    </div>""", unsafe_allow_html=True)
 
-    st.markdown('<hr class="divider">', unsafe_allow_html=True)
-    st.markdown("### All 6 Steps at a Glance")
-
-    steps = [
-        ("01", "Problem", "Language barrier for non-native English speakers"),
-        ("02", "Existing Solutions", "Duolingo, paid classes, SpanishDict — all with flaws"),
-        ("03", "Your Solution", "Personalized AI English platform, no ads"),
-        ("04", "Why Better", "Fully personalized, goal-driven learning"),
-        ("05", "Delivery Plan", "Online, on-demand — needs funding & domain"),
-        ("06", "First Customer", "Non-English-speaking friends via free trial"),
-    ]
-    for num, title, desc in steps:
-        st.markdown(f"""
-        <div style="display:flex;align-items:center;gap:20px;padding:12px 0;border-bottom:1px solid #d0c8b8">
-          <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:#e85d2f;min-width:36px">{num}</span>
-          <span style="font-family:'Syne',sans-serif;font-weight:700;min-width:180px">{title}</span>
-          <span style="color:#555;font-size:0.9rem">{desc}</span>
-        </div>""", unsafe_allow_html=True)
+st.markdown("### Levels Overview")
+levels_preview = [
+    ("📘", "Level 1", "Beginner", "Basic greetings, numbers, everyday words", "#3b82f6"),
+    ("📗", "Level 2", "Elementary", "Simple sentences, shopping, asking directions", "#22c55e"),
+    ("📙", "Level 3", "Intermediate", "Work conversations, opinions, storytelling", "#f59e0b"),
+    ("📕", "Level 4", "Upper Intermediate", "Job interviews, complex discussions", "#ef4444"),
+    ("📓", "Level 5", "Advanced", "Fluency, idioms, professional English", "#8b5cf6"),
+]
+for icon, lvl, label, desc, color in levels_preview:
+    st.markdown(f"""
+    <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid #d0c8b8">
+      <span style="font-size:1.4rem">{icon}</span>
+      <span style="font-family:'Syne',sans-serif;font-weight:700;min-width:70px">{lvl}</span>
+      <span style="color:{color};font-weight:600;min-width:150px">{label}</span>
+      <span style="color:#555;font-size:0.88rem">{desc}</span>
+    </div>""", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STEP 1 – PROBLEM
+# ABOUT / BUSINESS CONCEPT
 # ══════════════════════════════════════════════════════════════════════════════
-elif page == "❗ Step 1 – Problem":
-    st.markdown('<div class="hero-badge">Step 1</div>', unsafe_allow_html=True)
-    st.title("The Problem")
-    st.markdown('<hr class="divider">', unsafe_allow_html=True)
+st.markdown('<div id="about" class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="hero-badge">About Echo English</div>', unsafe_allow_html=True)
+st.title("The Business Concept")
+st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
+col1, col2 = st.columns(2)
+with col1:
     st.markdown("""
     <div class="step-card">
-      <div class="step-label">Core Problem</div>
-      <div class="step-title">Language Barrier in English-Speaking Countries</div>
+      <div class="step-label">The Problem</div>
+      <div class="step-title">Language Barrier</div>
       <div class="answer-block">
-        People living in English-speaking countries can't hold a conversation and/or get a job because of the language barrier.
+        People living in English-speaking countries can't hold a conversation or get a job because of the language barrier.
+        Existing solutions either have ads, cost too much, or simply don't build real conversational skills.
       </div>
     </div>""", unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="step-card">
-      <div class="step-label">Who Has This Problem?</div>
-      <div class="step-title">The Target Population</div>
-      <div class="answer-block">
-        People whose <strong>first language isn't English</strong> and who are living in primarily English-speaking countries.
-        This includes immigrants, refugees, international students, and expats navigating daily life and the job market.
-      </div>
-    </div>""", unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("#### Why this matters")
-        for item in [
-            "Job opportunities require conversational English",
-            "Daily life (shopping, healthcare, transport) demands it",
-            "Social inclusion depends on communication",
-            "Existing tools don't solve the real conversational gap",
-        ]:
-            st.markdown(f"""
-            <div class="check-item">
-              <span class="check-icon">→</span>
-              <span>{item}</span>
-            </div>""", unsafe_allow_html=True)
-
-    with col2:
-        st.markdown("#### Who specifically?")
-        groups = ["Immigrants", "Refugees", "International Students", "Expats", "Foreign Workers"]
-        for g in groups:
-            st.markdown(f'<span class="pill">{g}</span>', unsafe_allow_html=True)
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# STEP 2 – EXISTING SOLUTIONS
-# ══════════════════════════════════════════════════════════════════════════════
-elif page == "🔍 Step 2 – Existing Solutions":
-    st.markdown('<div class="hero-badge">Step 2</div>', unsafe_allow_html=True)
-    st.title("Existing Solutions")
-    st.markdown('<hr class="divider">', unsafe_allow_html=True)
-
-    st.markdown("### Current Alternatives")
-    competitors = [
-        ("🦉 Duolingo", "Gamified language app", "Addictive streak mechanics, not real learning. Doesn't build true conversational ability."),
-        ("🏫 English Classes", "In-person or group instruction", "Expensive, fixed schedule, doesn't go at your own pace. Hard to access for working adults."),
-        ("📖 SpanishDict", "Translation & vocabulary tool", "Primarily a dictionary/translator — no conversational practice or structured learning path."),
-    ]
-    for icon_name, subtitle, flaw in competitors:
+    st.markdown("**Competitors & Their Flaws**")
+    for name, flaw in [
+        ("🦉 Duolingo", "Gamified streaks — not real conversation skills"),
+        ("🏫 English Classes", "Expensive, rigid schedule, not self-paced"),
+        ("📖 SpanishDict", "Dictionary only — no structured learning"),
+    ]:
         st.markdown(f"""
         <div class="competitor-card">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start">
-            <div>
-              <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem">{icon_name}</div>
-              <div style="color:#888;font-size:0.85rem;margin-bottom:8px">{subtitle}</div>
-            </div>
-            <span class="pill-outline">Competitor</span>
-          </div>
-          <div style="color:#c0392b;font-size:0.9rem"><strong>❌ Problem:</strong> {flaw}</div>
+          <strong>{name}</strong><br>
+          <span style="color:#c0392b;font-size:0.9rem">❌ {flaw}</span>
         </div>""", unsafe_allow_html=True)
 
-    st.markdown('<hr class="divider">', unsafe_allow_html=True)
-    st.markdown("### What's Frustrating or Missing?")
+with col2:
     st.markdown("""
     <div class="step-card">
+      <div class="step-label">Our Solution</div>
+      <div class="step-title">Echo English</div>
       <div class="answer-block">
-        Existing solutions either <strong>have ads</strong>, <strong>cost a lot of money</strong>, or simply <strong>don't work</strong> for real conversation.
-        Classes don't go at your own pace. Duolingo is more of an adrenaline rush that keeps people hooked — it doesn't
-        actually build the skills needed to hold a real English conversation or interview for a job.
+        A fully personalized AI English platform. No ads. No rigid schedule. Just real conversation practice
+        at your own pace, 24/7, with an AI tutor that adapts to you.
       </div>
     </div>""", unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Duolingo Ads", "Present (free tier)", "Major friction")
-    col2.metric("Class Cost", "$50–200/mo", "Barrier to entry")
-    col3.metric("Real Convo Prep", "Minimal", "Core gap")
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# STEP 3 – YOUR SOLUTION
-# ══════════════════════════════════════════════════════════════════════════════
-elif page == "✅ Step 3 – Your Solution":
-    st.markdown('<div class="hero-badge">Step 3</div>', unsafe_allow_html=True)
-    st.title("Your Solution Idea")
-    st.markdown('<hr class="divider">', unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="step-card">
-      <div class="step-label">Product / Service</div>
-      <div class="step-title">AI-Powered English Learning Website</div>
-      <div class="answer-block">
-        A website similar to Duolingo, except it goes <strong>solely at your own pace</strong> and is focused entirely
-        on helping people <strong>speak and listen to real English conversations</strong> — so they can understand
-        what's going on in daily life, work, and social settings.
-      </div>
-    </div>""", unsafe_allow_html=True)
-
-    st.markdown("### What Does the Customer Receive?")
-    features = [
-        ("🤖", "Built-in AI Tutor", "A personal AI that adapts to your level and learning speed"),
-        ("📋", "Customized Assignments", "Lessons tailored to your specific goals and weak areas"),
-        ("🕐", "24/7 Availability", "Learn anytime — no schedule, no waiting for a teacher"),
-        ("🚫", "Zero Ads", "Completely ad-free experience — learning first, always"),
-        ("👤", "Personal Account", "Track your progress, revisit lessons, set goals"),
-    ]
-    col1, col2 = st.columns(2)
-    for i, (icon, title, desc) in enumerate(features):
-        col = col1 if i % 2 == 0 else col2
-        col.markdown(f"""
-        <div class="step-card" style="padding:20px 24px">
-          <div style="font-size:1.5rem;margin-bottom:8px">{icon}</div>
-          <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:4px">{title}</div>
-          <div style="color:#555;font-size:0.9rem">{desc}</div>
-        </div>""", unsafe_allow_html=True)
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# STEP 4 – WHY BETTER
-# ══════════════════════════════════════════════════════════════════════════════
-elif page == "⚡ Step 4 – Why Better":
-    st.markdown('<div class="hero-badge">Step 4</div>', unsafe_allow_html=True)
-    st.title("Why Is Your Solution Better?")
-    st.markdown('<hr class="divider">', unsafe_allow_html=True)
-
-    advantages = [
-        ("More Personalized", True, "Fully adaptive AI — every lesson fits the individual learner's needs and pace"),
-        ("Higher Quality", True, "Focus on real conversation and listening, not gamified streaks"),
-        ("Faster / More Convenient", True, "On-demand, 24/7, no commute, no scheduling"),
-        ("Easier to Use", True, "Clean interface, no distracting ads, no complexity"),
-        ("Cheaper", False, "Pricing model still TBD — but goal is accessible pricing"),
-    ]
-
-    for label, checked, explanation in advantages:
-        icon = "✅" if checked else "⬜"
-        border = "#e85d2f" if checked else "#ccc"
+    for icon, title, desc in [
+        ("🤖", "Built-in AI Tutor", "Adapts to your level and speed"),
+        ("📋", "Custom Assignments", "Tailored to your specific goals"),
+        ("🕐", "24/7 Availability", "Learn anytime, no schedule needed"),
+        ("🚫", "Zero Ads", "Learning first, always"),
+    ]:
         st.markdown(f"""
-        <div class="step-card" style="border-left-color:{border};margin-bottom:12px;padding:18px 24px">
-          <div style="display:flex;align-items:center;gap:12px">
-            <span style="font-size:1.2rem">{icon}</span>
-            <div>
-              <div style="font-family:'Syne',sans-serif;font-weight:700">{label}</div>
-              <div style="color:#555;font-size:0.9rem;margin-top:2px">{explanation}</div>
-            </div>
-          </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #d0c8b8">
+          <span style="font-size:1.3rem">{icon}</span>
+          <div><strong>{title}</strong><br><span style="color:#555;font-size:0.88rem">{desc}</span></div>
         </div>""", unsafe_allow_html=True)
 
-    st.markdown('<hr class="divider">', unsafe_allow_html=True)
+st.markdown('<hr class="divider">', unsafe_allow_html=True)
+col1, col2, col3 = st.columns(3)
+col1.metric("Problem Clarity", "9/10", "Well-defined & specific")
+col2.metric("Solution Originality", "8/10", "AI personalization edge")
+col3.metric("Market Potential", "10/10", "Massive global need")
+st.markdown('</div>', unsafe_allow_html=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# LEVEL 1 – BEGINNER
+# ══════════════════════════════════════════════════════════════════════════════
+st.markdown('<div id="level-1" class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="hero-badge">📘 Level 1 — Beginner</div>', unsafe_allow_html=True)
+st.title("Level 1 – Beginner")
+st.markdown("##### Start from zero. Learn the words and phrases you need every single day.")
+st.markdown('<hr class="divider">', unsafe_allow_html=True)
+
+tab1, tab2, tab3 = st.tabs(["📖 Vocabulary", "💬 Phrases", "🎯 Practice"])
+with tab1:
+    st.markdown("### Essential Words")
+    for cat, words in [
+        ("Greetings", ["Hello", "Goodbye", "Please", "Thank you", "Sorry", "Yes", "No"]),
+        ("Numbers", ["One", "Two", "Three", "Four", "Five", "Ten", "Twenty", "Hundred"]),
+        ("Colors", ["Red", "Blue", "Green", "White", "Black", "Yellow"]),
+        ("Family", ["Mother", "Father", "Brother", "Sister", "Friend", "Baby"]),
+    ]:
+        st.markdown(f"**{cat}**")
+        st.markdown("".join([f'<span class="vocab-word">{w}</span>' for w in words]) + "<br><br>", unsafe_allow_html=True)
+
+with tab2:
+    st.markdown("### Key Phrases for Daily Life")
+    for section, items in [
+        ("Meeting people", [("Hello, my name is ___.", "Hola, me llamo ___."), ("Nice to meet you.", "Mucho gusto."), ("How are you?", "¿Cómo estás?"), ("I'm fine, thank you.", "Estoy bien, gracias.")]),
+        ("Asking for help", [("Can you help me?", "¿Me puede ayudar?"), ("I don't understand.", "No entiendo."), ("Please speak slowly.", "Por favor hable despacio."), ("Where is the bathroom?", "¿Dónde está el baño?")]),
+        ("Shopping", [("How much does this cost?", "¿Cuánto cuesta esto?"), ("I would like this, please.", "Quisiera esto, por favor."), ("Do you accept cash?", "¿Acepta efectivo?")]),
+    ]:
+        st.markdown(f"**{section}**")
+        for en, es in items:
+            st.markdown(f'<div class="phrase-box">🇺🇸 <strong>{en}</strong><br><span style="color:#888;font-size:0.85rem">🇪🇸 {es}</span></div>', unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+
+with tab3:
+    st.markdown("### Quick Practice")
+    q1 = st.radio("1. 'Hello, ___ name is Maria.' — which word fits?", ["my", "your", "his", "she"], key="l1q1")
+    if q1 == "my": st.success("✅ Correct!")
+    elif q1: st.error("❌ The answer is 'my'.")
+    q2 = st.radio("2. You want to say thank you. You say:", ["Sorry", "Goodbye", "Thank you", "No"], key="l1q2")
+    if q2 == "Thank you": st.success("✅ Correct!")
+    elif q2: st.error("❌ The answer is 'Thank you'.")
+    q3 = st.radio("3. You don't understand something. You say:", ["I am fine.", "I don't understand.", "Nice to meet you.", "How much?"], key="l1q3")
+    if q3 == "I don't understand.": st.success("✅ Correct!")
+    elif q3: st.error("❌ The answer is 'I don't understand.'")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# LEVEL 2 – ELEMENTARY
+# ══════════════════════════════════════════════════════════════════════════════
+st.markdown('<div id="level-2" class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="hero-badge">📗 Level 2 — Elementary</div>', unsafe_allow_html=True)
+st.title("Level 2 – Elementary")
+st.markdown("##### Build simple sentences and handle everyday situations with confidence.")
+st.markdown('<hr class="divider">', unsafe_allow_html=True)
+
+tab1, tab2, tab3 = st.tabs(["📖 Vocabulary", "💬 Phrases", "🎯 Practice"])
+with tab1:
+    st.markdown("### Expanding Your Word Bank")
+    for cat, words in [
+        ("At Work", ["Job", "Office", "Manager", "Meeting", "Email", "Schedule", "Deadline", "Team"]),
+        ("At the Store", ["Price", "Receipt", "Change", "Discount", "Size", "Aisle", "Checkout"]),
+        ("Directions", ["Left", "Right", "Straight", "Corner", "Block", "Near", "Far", "Across"]),
+        ("Time", ["Morning", "Afternoon", "Evening", "Tonight", "Yesterday", "Tomorrow", "Weekly"]),
+    ]:
+        st.markdown(f"**{cat}**")
+        st.markdown("".join([f'<span class="vocab-word">{w}</span>' for w in words]) + "<br><br>", unsafe_allow_html=True)
+
+with tab2:
+    st.markdown("### Useful Sentences")
+    for section, items in [
+        ("Asking directions", [("How do I get to ___?", "¿Cómo llego a ___?"), ("Is it far from here?", "¿Está lejos de aquí?"), ("Turn left at the corner.", "Gire a la izquierda en la esquina.")]),
+        ("At work or school", [("When is the deadline?", "¿Cuándo es la fecha límite?"), ("Can I ask a question?", "¿Puedo hacer una pregunta?"), ("I will send you an email.", "Le enviaré un correo electrónico.")]),
+        ("Daily life", [("What time does it open?", "¿A qué hora abre?"), ("I need to make an appointment.", "Necesito hacer una cita."), ("Can I pay by card?", "¿Puedo pagar con tarjeta?")]),
+    ]:
+        st.markdown(f"**{section}**")
+        for en, es in items:
+            st.markdown(f'<div class="phrase-box">🇺🇸 <strong>{en}</strong><br><span style="color:#888;font-size:0.85rem">🇪🇸 {es}</span></div>', unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+
+with tab3:
+    st.markdown("### Practice Sentences")
+    q1 = st.radio("1. You want to know how to get somewhere. You ask:", ["What time is it?", "How do I get to the station?", "Can I have the bill?", "Where are you from?"], key="l2q1")
+    if q1 == "How do I get to the station?": st.success("✅ Correct!")
+    elif q1: st.error("❌ The answer is 'How do I get to the station?'")
+    q2 = st.radio("2. Your boss asks for the report. You say:", ["I will send you an email.", "I am hungry.", "Turn left.", "Good morning."], key="l2q2")
+    if q2 == "I will send you an email.": st.success("✅ Correct!")
+    elif q2: st.error("❌ The answer is 'I will send you an email.'")
+    q3 = st.radio("3. You want to pay. You ask:", ["Is it far?", "Can I pay by card?", "What is your name?", "I don't understand."], key="l2q3")
+    if q3 == "Can I pay by card?": st.success("✅ Correct!")
+    elif q3: st.error("❌ The answer is 'Can I pay by card?'")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# LEVEL 3 – INTERMEDIATE
+# ══════════════════════════════════════════════════════════════════════════════
+st.markdown('<div id="level-3" class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="hero-badge">📙 Level 3 — Intermediate</div>', unsafe_allow_html=True)
+st.title("Level 3 – Intermediate")
+st.markdown("##### Hold real conversations, express opinions, and talk about your life and work.")
+st.markdown('<hr class="divider">', unsafe_allow_html=True)
+
+tab1, tab2, tab3 = st.tabs(["📖 Vocabulary", "💬 Conversations", "🎯 Practice"])
+with tab1:
+    st.markdown("### Level Up Your Vocabulary")
+    for cat, words in [
+        ("Opinions & Feelings", ["Agree", "Disagree", "Prefer", "Frustrated", "Confident", "Nervous", "Excited", "Disappointed"]),
+        ("Work & Career", ["Promotion", "Salary", "Interview", "Colleague", "Responsible", "Experience", "Qualification"]),
+        ("Describing things", ["Complicated", "Efficient", "Reliable", "Flexible", "Obvious", "Detailed", "Urgent"]),
+        ("Connectors", ["However", "Therefore", "Although", "Meanwhile", "Furthermore", "As a result"]),
+    ]:
+        st.markdown(f"**{cat}**")
+        st.markdown("".join([f'<span class="vocab-word">{w}</span>' for w in words]) + "<br><br>", unsafe_allow_html=True)
+
+with tab2:
+    st.markdown("### Real Conversation Scenarios")
     st.markdown("""
-    <div class="step-card">
-      <div class="step-label">Core Explanation</div>
-      <div class="step-title">Personalization Is the Goal</div>
-      <div class="answer-block">
-        Our main goal is allowing people to <strong>actually learn</strong> — and the best way to do that is with
-        fully personalized lessons and achievable goals to reach. One-size-fits-all doesn't work for language learning.
-      </div>
+    <div class="lesson-card">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:12px">🏢 At Work — Expressing an Opinion</div>
+      <div class="phrase-box">👤 Boss: "What do you think about the new schedule?"</div>
+      <div class="phrase-box">🗣️ You: "I think it's a good idea, <strong>however</strong> I'm concerned about the Friday deadline."</div>
+      <div class="phrase-box">👤 Boss: "That's a fair point. What do you suggest?"</div>
+      <div class="phrase-box">🗣️ You: "Maybe we could move it to Monday? That would give everyone more time."</div>
+    </div>
+    <div class="lesson-card">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:12px">🤝 Meeting Someone New — Telling Your Story</div>
+      <div class="phrase-box">👤 Person: "Where are you from originally?"</div>
+      <div class="phrase-box">🗣️ You: "I'm from Mexico. I moved here two years ago to find better work opportunities."</div>
+      <div class="phrase-box">👤 Person: "How are you finding it?"</div>
+      <div class="phrase-box">🗣️ You: "<strong>Although</strong> it was hard at first, I'm really enjoying it now."</div>
     </div>""", unsafe_allow_html=True)
 
+with tab3:
+    st.markdown("### Fill in the Connector")
+    q1 = st.radio("1. 'The job pays well. ___, the hours are long.'", ["Therefore", "However", "Although", "Meanwhile"], key="l3q1")
+    if q1 == "However": st.success("✅ Correct! 'However' shows contrast.")
+    elif q1: st.error("❌ The best answer is 'However' — it shows a contrast.")
+    q2 = st.radio("2. 'She studied hard. ___, she passed the exam.'", ["However", "Although", "Therefore", "Meanwhile"], key="l3q2")
+    if q2 == "Therefore": st.success("✅ Correct! 'Therefore' shows cause and result.")
+    elif q2: st.error("❌ The best answer is 'Therefore'.")
+    q3 = st.radio("3. '___ it was raining, they went for a walk.'", ["Therefore", "Furthermore", "Although", "As a result"], key="l3q3")
+    if q3 == "Although": st.success("✅ Correct!")
+    elif q3: st.error("❌ The answer is 'Although'.")
 
-# ══════════════════════════════════════════════════════════════════════════════
-# STEP 5 – DELIVERY PLAN
-# ══════════════════════════════════════════════════════════════════════════════
-elif page == "🚀 Step 5 – Delivery Plan":
-    st.markdown('<div class="hero-badge">Step 5</div>', unsafe_allow_html=True)
-    st.title("Delivery Plan")
-    st.markdown('<hr class="divider">', unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("### How It's Delivered")
-        delivery = [
-            ("🌐", "Online", True),
-            ("📲", "On Demand", True),
-            ("📅", "Scheduled", False),
-            ("🤝", "In Person", False),
-        ]
-        for icon, label, selected in delivery:
-            bg = "#1a1a1a" if selected else "#fff"
-            color = "#f5f0e8" if selected else "#1a1a1a"
-            border = "#1a1a1a"
-            st.markdown(f"""
-            <div style="background:{bg};color:{color};border:2px solid {border};
-                        padding:14px 20px;margin:8px 0;font-family:'Syne',sans-serif;
-                        font-weight:700;display:flex;align-items:center;gap:12px">
-              <span>{icon}</span> {label}
-              {'<span style="margin-left:auto;font-size:0.7rem;letter-spacing:1px">SELECTED</span>' if selected else ''}
-            </div>""", unsafe_allow_html=True)
-
-    with col2:
-        st.markdown("### Tools & Resources Needed")
-        needs = [
-            ("💰", "Funding / Money"),
-            ("🌐", "Domain Name"),
-            ("💻", "Website Development"),
-            ("🤖", "Working AI Integration"),
-            ("💳", "Payment Processing"),
-            ("📢", "Advertising"),
-            ("👥", "Consumers / Users"),
-        ]
-        for icon, item in needs:
-            st.markdown(f"""
-            <div class="check-item">
-              <span style="font-size:1rem">{icon}</span>
-              <span>{item}</span>
-            </div>""", unsafe_allow_html=True)
-
-    st.markdown('<hr class="divider">', unsafe_allow_html=True)
-    st.markdown("### Could You Do This in a Week?")
-    st.markdown("""
-    <div class="step-card" style="border-left-color:#c0392b">
-      <div style="display:flex;align-items:center;gap:12px">
-        <span style="font-size:2rem">❌</span>
-        <div>
-          <div style="font-family:'Syne',sans-serif;font-weight:800">No — Not Without Funding</div>
-          <div style="color:#555;font-size:0.9rem;margin-top:4px">
-            Without significant funding or a donation, launching within a week isn't realistic.
-            The main blocker is capital for development, AI integration, and infrastructure.
-          </div>
-        </div>
-      </div>
-    </div>""", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STEP 6 – FIRST CUSTOMER
+# LEVEL 4 – UPPER INTERMEDIATE
 # ══════════════════════════════════════════════════════════════════════════════
-elif page == "👤 Step 6 – First Customer":
-    st.markdown('<div class="hero-badge">Step 6</div>', unsafe_allow_html=True)
-    st.title("Your First Customer")
-    st.markdown('<hr class="divider">', unsafe_allow_html=True)
+st.markdown('<div id="level-4" class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="hero-badge">📕 Level 4 — Upper Intermediate</div>', unsafe_allow_html=True)
+st.title("Level 4 – Upper Intermediate")
+st.markdown("##### Sound more natural, nail job interviews, and handle complex conversations.")
+st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""
-        <div class="step-card">
-          <div class="step-label">Who?</div>
-          <div class="step-title">Non-English-Speaking Friends</div>
-          <div class="answer-block">
-            The very first customers would be <strong>friends who don't speak English as their first language</strong>.
-            A known, trusted group — perfect for getting honest early feedback.
-          </div>
-        </div>""", unsafe_allow_html=True)
+tab1, tab2, tab3 = st.tabs(["📖 Vocabulary", "💼 Job Interview", "🎯 Practice"])
+with tab1:
+    st.markdown("### Professional & Nuanced Vocabulary")
+    for cat, words in [
+        ("Professional English", ["Demonstrate", "Initiative", "Collaborate", "Negotiate", "Implement", "Facilitate", "Prioritize"]),
+        ("Expressing nuance", ["Presumably", "Technically", "Essentially", "Relatively", "Particularly", "Consistently"]),
+        ("Soft skills", ["Adaptable", "Proactive", "Analytical", "Detail-oriented", "Goal-driven", "Self-motivated"]),
+        ("Tone shifters", ["I'd suggest...", "It might be worth...", "Have you considered...", "One option could be..."]),
+    ]:
+        st.markdown(f"**{cat}**")
+        st.markdown("".join([f'<span class="vocab-word">{w}</span>' for w in words]) + "<br><br>", unsafe_allow_html=True)
 
-    with col2:
-        st.markdown("""
-        <div class="step-card">
-          <div class="step-label">How to Reach Them?</div>
-          <div class="step-title">Free Trial Offer</div>
-          <div class="answer-block">
-            Approach them directly and <strong>offer a free trial</strong> of the platform.
-            Word-of-mouth from a trusted first group can spark organic growth.
-          </div>
-        </div>""", unsafe_allow_html=True)
+with tab2:
+    st.markdown("### Job Interview Prep")
+    for q, tip in [
+        ("Tell me about yourself.", "Start with your background, mention key experience, end with why you're here. Under 2 minutes."),
+        ("What are your strengths?", "Pick 2–3 real strengths with examples: 'I'm very detail-oriented — for example...'"),
+        ("Why do you want this job?", "Show you researched the company and connect your skills to their needs."),
+        ("Where do you see yourself in 5 years?", "Show ambition but also commitment: 'I'd like to grow within this company.'"),
+        ("Do you have any questions for us?", "Always say yes! Ask about the team, the role, or growth opportunities."),
+    ]:
+        with st.expander(f"❓ {q}"):
+            st.markdown(f'<div class="phrase-box"><strong>💡 Tip:</strong> {tip}</div>', unsafe_allow_html=True)
 
-    st.markdown('<hr class="divider">', unsafe_allow_html=True)
-    st.markdown("### Early Adoption Strategy")
-    steps_go = [
-        ("1", "Identify 5–10 non-English-speaking friends"),
-        ("2", "Offer completely free access as beta testers"),
-        ("3", "Collect feedback on what works and what doesn't"),
-        ("4", "Iterate on the product based on real usage"),
-        ("5", "Use their success stories as social proof"),
-    ]
-    for num, step in steps_go:
+with tab3:
+    st.markdown("### Choose the Most Professional Response")
+    q1 = st.radio("1. Your manager asks why you missed a deadline. You say:", ["It's not my fault.", "I apologize — I underestimated the time needed and I've already adjusted my approach.", "I was busy.", "Nobody told me."], key="l4q1")
+    if q1 == "I apologize — I underestimated the time needed and I've already adjusted my approach.": st.success("✅ Professional and accountable.")
+    elif q1: st.error("❌ A professional takes responsibility and offers a solution.")
+    q2 = st.radio("2. You disagree with a colleague's idea in a meeting. You say:", ["That's wrong.", "I hear you, and I'd suggest we also consider the budget impact before deciding.", "Whatever.", "No."], key="l4q2")
+    if q2 == "I hear you, and I'd suggest we also consider the budget impact before deciding.": st.success("✅ Respectful disagreement — great tone.")
+    elif q2: st.error("❌ Disagreeing professionally means acknowledging the other view first.")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# LEVEL 5 – ADVANCED
+# ══════════════════════════════════════════════════════════════════════════════
+st.markdown('<div id="level-5" class="section-wrap">', unsafe_allow_html=True)
+st.markdown('<div class="hero-badge">📓 Level 5 — Advanced</div>', unsafe_allow_html=True)
+st.title("Level 5 – Advanced")
+st.markdown("##### Master idioms, nuance, tone, and fluency. Speak like you've always lived here.")
+st.markdown('<hr class="divider">', unsafe_allow_html=True)
+
+tab1, tab2, tab3 = st.tabs(["📖 Idioms", "🎭 Tone & Register", "🎯 Practice"])
+with tab1:
+    st.markdown("### Common English Idioms")
+    st.markdown("Native speakers use these constantly. Learn them and you'll sound fluent.")
+    for idiom, meaning, example in [
+        ("Hit the ground running", "To start something and immediately work hard at it.", "She hit the ground running on her first day."),
+        ("Beat around the bush", "To avoid talking about the main topic.", "Stop beating around the bush — just tell me what happened."),
+        ("On the fence", "Undecided about something.", "I'm still on the fence about whether to take the offer."),
+        ("Bite the bullet", "To endure a painful situation because it's necessary.", "I didn't want to apologize, but I bit the bullet and did it."),
+        ("The ball is in your court", "It's your turn to take action.", "I've sent the proposal — the ball is in their court now."),
+        ("Under the weather", "Feeling sick or unwell.", "I can't come in today, I'm feeling a bit under the weather."),
+    ]:
         st.markdown(f"""
-        <div style="display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid #d0c8b8">
-          <span style="background:#e85d2f;color:#fff;font-family:'Syne',sans-serif;font-weight:800;
-                       width:32px;height:32px;display:flex;align-items:center;justify-content:center;
-                       flex-shrink:0;font-size:0.9rem">{num}</span>
-          <span>{step}</span>
+        <div class="lesson-card">
+          <div style="font-family:'Syne',sans-serif;font-weight:800;color:#e85d2f">"{idiom}"</div>
+          <div style="margin:6px 0;font-size:0.9rem"><strong>Meaning:</strong> {meaning}</div>
+          <div class="phrase-box">💬 <em>"{example}"</em></div>
         </div>""", unsafe_allow_html=True)
 
+with tab2:
+    st.markdown("### Tone & Register")
+    st.markdown("The same idea can sound very different depending on context. Compare:")
+    for situation, casual, neutral, formal in [
+        ("Asking for something", "Oi, send me that file.", "Could you send me that file when you get a chance?", "I would greatly appreciate it if you could send the file at your earliest convenience."),
+        ("Saying you're busy", "I can't, I'm swamped.", "I'm pretty tied up right now — can we reschedule?", "Unfortunately, I have prior commitments that prevent me from attending."),
+        ("Disagreeing", "That's a bad idea.", "I'm not sure that's the best approach — what about...?", "While I appreciate the suggestion, I have some concerns I'd like to raise."),
+    ]:
+        st.markdown(f"**{situation}**")
+        c1, c2, c3 = st.columns(3)
+        c1.markdown(f'<div class="phrase-box" style="border-left-color:#f59e0b"><strong>Casual</strong><br><em>"{casual}"</em></div>', unsafe_allow_html=True)
+        c2.markdown(f'<div class="phrase-box" style="border-left-color:#22c55e"><strong>Neutral</strong><br><em>"{neutral}"</em></div>', unsafe_allow_html=True)
+        c3.markdown(f'<div class="phrase-box" style="border-left-color:#3b82f6"><strong>Formal</strong><br><em>"{formal}"</em></div>', unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# REFLECTION
-# ══════════════════════════════════════════════════════════════════════════════
-elif page == "💬 Reflection":
-    st.markdown('<div class="hero-badge">Reflection</div>', unsafe_allow_html=True)
-    st.title("Why This Idea Feels Realistic")
-    st.markdown('<hr class="divider">', unsafe_allow_html=True)
+with tab3:
+    st.markdown("### Idiom Challenge")
+    q1 = st.radio("1. 'I'm on the fence about the new job.' What does this mean?", ["He already accepted it.", "He is undecided.", "He doesn't like it.", "He is sitting on something."], key="l5q1")
+    if q1 == "He is undecided.": st.success("✅ Correct! 'On the fence' means undecided.")
+    elif q1: st.error("❌ 'On the fence' means undecided.")
+    q2 = st.radio("2. 'The ball is in your court.' What should you do?", ["Wait for your boss.", "Take the next step yourself.", "Go play basketball.", "Ask someone else."], key="l5q2")
+    if q2 == "Take the next step yourself.": st.success("✅ Correct! It's your turn to act.")
+    elif q2: st.error("❌ It means it's your turn to make the next move.")
+    q3 = st.radio("3. Which is the most formal way to say you're sick?", ["I feel terrible.", "I'm under the weather.", "I am unwell and unable to attend.", "I'm not feeling it today."], key="l5q3")
+    if q3 == "I am unwell and unable to attend.": st.success("✅ Correct! Formal register avoids idioms and slang.")
+    elif q3: st.error("❌ The most formal version avoids casual phrases like 'under the weather'.")
 
-    st.markdown("""
-    <div class="reflection-box">
-      "Because it can help anyone out."
-    </div>""", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('<br>', unsafe_allow_html=True)
-    st.markdown("### Breaking It Down")
-    points = [
-        ("🌍", "Universal Need", "Language barriers affect hundreds of millions of people worldwide — the market is enormous and real."),
-        ("🧑‍💻", "Accessible Tech", "AI language tools already exist — this is about packaging them into something purposeful and user-first."),
-        ("🎯", "Clear Focus", "Unlike competitors that try to teach many languages broadly, this is laser-focused: English conversation for non-native speakers."),
-        ("💡", "Personal Connection", "The creator has real people in mind — friends who face this exact problem — making the idea grounded, not abstract."),
-    ]
-    for icon, title, desc in points:
-        st.markdown(f"""
-        <div class="step-card" style="padding:20px 24px">
-          <div style="display:flex;gap:16px;align-items:flex-start">
-            <span style="font-size:1.6rem">{icon}</span>
-            <div>
-              <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:4px">{title}</div>
-              <div style="color:#555;font-size:0.9rem">{desc}</div>
-            </div>
-          </div>
-        </div>""", unsafe_allow_html=True)
-
-    st.markdown('<hr class="divider">', unsafe_allow_html=True)
-    st.markdown("### Summary: Business Concept Scorecard")
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Problem Clarity", "9/10", "Well-defined & specific")
-    col2.metric("Solution Originality", "8/10", "AI personalization edge")
-    col3.metric("Market Potential", "10/10", "Massive global need")
-
-
+# ── Footer ────────────────────────────────────────────────────────────────────
+st.markdown("""
+<div style="background:#1a1a1a;color:#f5f0e8;text-align:center;padding:32px;margin-top:0">
+  <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:#e85d2f;margin-bottom:8px">🔊 Echo English</div>
+  <div style="color:#888;font-size:0.85rem">Learn at your own pace · Zero ads · Powered by AI · Created by Connor Burdick</div>
+</div>
+""", unsafe_allow_html=True)
 
 
