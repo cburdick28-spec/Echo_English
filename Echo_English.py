@@ -376,15 +376,21 @@ with tab2:
 
 with tab3:
     st.markdown("### Quick Practice")
-    q1 = st.radio("1. 'Hello, ___ name is Maria.' — which word fits?", ["my", "your", "his", "she"], key="l1q1")
-    if q1 == "my": st.success("✅ Correct!")
-    elif q1: st.error("❌ The answer is 'my'.")
-    q2 = st.radio("2. You want to say thank you. You say:", ["Sorry", "Goodbye", "Thank you", "No"], key="l1q2")
-    if q2 == "Thank you": st.success("✅ Correct!")
-    elif q2: st.error("❌ The answer is 'Thank you'.")
-    q3 = st.radio("3. You don't understand something. You say:", ["I am fine.", "I don't understand.", "Nice to meet you.", "How much?"], key="l1q3")
-    if q3 == "I don't understand.": st.success("✅ Correct!")
-    elif q3: st.error("❌ The answer is 'I don't understand.'")
+    st.markdown("Answer all questions, then press **Submit** to see your score.")
+    l1q1 = st.radio("1. 'Hello, ___ name is Maria.' — which word fits?", ["— select —", "my", "your", "his", "she"], key="l1q1")
+    l1q2 = st.radio("2. You want to say thank you. You say:", ["— select —", "Sorry", "Goodbye", "Thank you", "No"], key="l1q2")
+    l1q3 = st.radio("3. You don't understand something. You say:", ["— select —", "I am fine.", "I don't understand.", "Nice to meet you.", "How much?"], key="l1q3")
+    if st.button("Submit", key="l1_submit"):
+        pairs = [("Q1", l1q1, "my"), ("Q2", l1q2, "Thank you"), ("Q3", l1q3, "I don't understand.")]
+        score = sum(1 for _, chosen, correct in pairs if chosen == correct)
+        st.markdown(f"### Your Score: {score} / 3")
+        for label, chosen, correct in pairs:
+            if chosen == "— select —":
+                st.warning(f"⚠️ {label}: Not answered. Correct answer: **{correct}**")
+            elif chosen == correct:
+                st.success(f"✅ {label}: Correct!")
+            else:
+                st.error(f"❌ {label}: You chose '{chosen}'. Correct answer: **{correct}**")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -424,15 +430,21 @@ with tab2:
 
 with tab3:
     st.markdown("### Practice Sentences")
-    q1 = st.radio("1. You want to know how to get somewhere. You ask:", ["What time is it?", "How do I get to the station?", "Can I have the bill?", "Where are you from?"], key="l2q1")
-    if q1 == "How do I get to the station?": st.success("✅ Correct!")
-    elif q1: st.error("❌ The answer is 'How do I get to the station?'")
-    q2 = st.radio("2. Your boss asks for the report. You say:", ["I will send you an email.", "I am hungry.", "Turn left.", "Good morning."], key="l2q2")
-    if q2 == "I will send you an email.": st.success("✅ Correct!")
-    elif q2: st.error("❌ The answer is 'I will send you an email.'")
-    q3 = st.radio("3. You want to pay. You ask:", ["Is it far?", "Can I pay by card?", "What is your name?", "I don't understand."], key="l2q3")
-    if q3 == "Can I pay by card?": st.success("✅ Correct!")
-    elif q3: st.error("❌ The answer is 'Can I pay by card?'")
+    st.markdown("Answer all questions, then press **Submit** to see your score.")
+    l2q1 = st.radio("1. You want to know how to get somewhere. You ask:", ["— select —", "What time is it?", "How do I get to the station?", "Can I have the bill?", "Where are you from?"], key="l2q1")
+    l2q2 = st.radio("2. Your boss asks for the report. You say:", ["— select —", "I will send you an email.", "I am hungry.", "Turn left.", "Good morning."], key="l2q2")
+    l2q3 = st.radio("3. You want to pay. You ask:", ["— select —", "Is it far?", "Can I pay by card?", "What is your name?", "I don't understand."], key="l2q3")
+    if st.button("Submit", key="l2_submit"):
+        pairs = [("Q1", l2q1, "How do I get to the station?"), ("Q2", l2q2, "I will send you an email."), ("Q3", l2q3, "Can I pay by card?")]
+        score = sum(1 for _, chosen, correct in pairs if chosen == correct)
+        st.markdown(f"### Your Score: {score} / 3")
+        for label, chosen, correct in pairs:
+            if chosen == "— select —":
+                st.warning(f"⚠️ {label}: Not answered. Correct answer: **{correct}**")
+            elif chosen == correct:
+                st.success(f"✅ {label}: Correct!")
+            else:
+                st.error(f"❌ {label}: You chose '{chosen}'. Correct answer: **{correct}**")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -478,15 +490,21 @@ with tab2:
 
 with tab3:
     st.markdown("### Fill in the Connector")
-    q1 = st.radio("1. 'The job pays well. ___, the hours are long.'", ["Therefore", "However", "Although", "Meanwhile"], key="l3q1")
-    if q1 == "However": st.success("✅ Correct! 'However' shows contrast.")
-    elif q1: st.error("❌ The best answer is 'However' — it shows a contrast.")
-    q2 = st.radio("2. 'She studied hard. ___, she passed the exam.'", ["However", "Although", "Therefore", "Meanwhile"], key="l3q2")
-    if q2 == "Therefore": st.success("✅ Correct! 'Therefore' shows cause and result.")
-    elif q2: st.error("❌ The best answer is 'Therefore'.")
-    q3 = st.radio("3. '___ it was raining, they went for a walk.'", ["Therefore", "Furthermore", "Although", "As a result"], key="l3q3")
-    if q3 == "Although": st.success("✅ Correct!")
-    elif q3: st.error("❌ The answer is 'Although'.")
+    st.markdown("Answer all questions, then press **Submit** to see your score.")
+    l3q1 = st.radio("1. 'The job pays well. ___, the hours are long.'", ["— select —", "Therefore", "However", "Although", "Meanwhile"], key="l3q1")
+    l3q2 = st.radio("2. 'She studied hard. ___, she passed the exam.'", ["— select —", "However", "Although", "Therefore", "Meanwhile"], key="l3q2")
+    l3q3 = st.radio("3. '___ it was raining, they went for a walk.'", ["— select —", "Therefore", "Furthermore", "Although", "As a result"], key="l3q3")
+    if st.button("Submit", key="l3_submit"):
+        pairs = [("Q1", l3q1, "However"), ("Q2", l3q2, "Therefore"), ("Q3", l3q3, "Although")]
+        score = sum(1 for _, chosen, correct in pairs if chosen == correct)
+        st.markdown(f"### Your Score: {score} / 3")
+        for label, chosen, correct in pairs:
+            if chosen == "— select —":
+                st.warning(f"⚠️ {label}: Not answered. Correct answer: **{correct}**")
+            elif chosen == correct:
+                st.success(f"✅ {label}: Correct!")
+            else:
+                st.error(f"❌ {label}: You chose '{chosen}'. Correct answer: **{correct}**")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -526,12 +544,23 @@ with tab2:
 
 with tab3:
     st.markdown("### Choose the Most Professional Response")
-    q1 = st.radio("1. Your manager asks why you missed a deadline. You say:", ["It's not my fault.", "I apologize — I underestimated the time needed and I've already adjusted my approach.", "I was busy.", "Nobody told me."], key="l4q1")
-    if q1 == "I apologize — I underestimated the time needed and I've already adjusted my approach.": st.success("✅ Professional and accountable.")
-    elif q1: st.error("❌ A professional takes responsibility and offers a solution.")
-    q2 = st.radio("2. You disagree with a colleague's idea in a meeting. You say:", ["That's wrong.", "I hear you, and I'd suggest we also consider the budget impact before deciding.", "Whatever.", "No."], key="l4q2")
-    if q2 == "I hear you, and I'd suggest we also consider the budget impact before deciding.": st.success("✅ Respectful disagreement — great tone.")
-    elif q2: st.error("❌ Disagreeing professionally means acknowledging the other view first.")
+    st.markdown("Answer all questions, then press **Submit** to see your score.")
+    l4q1 = st.radio("1. Your manager asks why you missed a deadline. You say:", ["— select —", "It's not my fault.", "I apologize — I underestimated the time needed and I've already adjusted my approach.", "I was busy.", "Nobody told me."], key="l4q1")
+    l4q2 = st.radio("2. You disagree with a colleague's idea in a meeting. You say:", ["— select —", "That's wrong.", "I hear you, and I'd suggest we also consider the budget impact before deciding.", "Whatever.", "No."], key="l4q2")
+    if st.button("Submit", key="l4_submit"):
+        pairs = [
+            ("Q1", l4q1, "I apologize — I underestimated the time needed and I've already adjusted my approach."),
+            ("Q2", l4q2, "I hear you, and I'd suggest we also consider the budget impact before deciding."),
+        ]
+        score = sum(1 for _, chosen, correct in pairs if chosen == correct)
+        st.markdown(f"### Your Score: {score} / 2")
+        for label, chosen, correct in pairs:
+            if chosen == "— select —":
+                st.warning(f"⚠️ {label}: Not answered. Correct answer: **{correct}**")
+            elif chosen == correct:
+                st.success(f"✅ {label}: Correct!")
+            else:
+                st.error(f"❌ {label}: You chose '{chosen}'. Correct answer: **{correct}**")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -581,15 +610,21 @@ with tab2:
 
 with tab3:
     st.markdown("### Idiom Challenge")
-    q1 = st.radio("1. 'I'm on the fence about the new job.' What does this mean?", ["He already accepted it.", "He is undecided.", "He doesn't like it.", "He is sitting on something."], key="l5q1")
-    if q1 == "He is undecided.": st.success("✅ Correct! 'On the fence' means undecided.")
-    elif q1: st.error("❌ 'On the fence' means undecided.")
-    q2 = st.radio("2. 'The ball is in your court.' What should you do?", ["Wait for your boss.", "Take the next step yourself.", "Go play basketball.", "Ask someone else."], key="l5q2")
-    if q2 == "Take the next step yourself.": st.success("✅ Correct! It's your turn to act.")
-    elif q2: st.error("❌ It means it's your turn to make the next move.")
-    q3 = st.radio("3. Which is the most formal way to say you're sick?", ["I feel terrible.", "I'm under the weather.", "I am unwell and unable to attend.", "I'm not feeling it today."], key="l5q3")
-    if q3 == "I am unwell and unable to attend.": st.success("✅ Correct! Formal register avoids idioms and slang.")
-    elif q3: st.error("❌ The most formal version avoids casual phrases like 'under the weather'.")
+    st.markdown("Answer all questions, then press **Submit** to see your score.")
+    l5q1 = st.radio("1. 'I'm on the fence about the new job.' What does this mean?", ["— select —", "He already accepted it.", "He is undecided.", "He doesn't like it.", "He is sitting on something."], key="l5q1")
+    l5q2 = st.radio("2. 'The ball is in your court.' What should you do?", ["— select —", "Wait for your boss.", "Take the next step yourself.", "Go play basketball.", "Ask someone else."], key="l5q2")
+    l5q3 = st.radio("3. Which is the most formal way to say you're sick?", ["— select —", "I feel terrible.", "I'm under the weather.", "I am unwell and unable to attend.", "I'm not feeling it today."], key="l5q3")
+    if st.button("Submit", key="l5_submit"):
+        pairs = [("Q1", l5q1, "He is undecided."), ("Q2", l5q2, "Take the next step yourself."), ("Q3", l5q3, "I am unwell and unable to attend.")]
+        score = sum(1 for _, chosen, correct in pairs if chosen == correct)
+        st.markdown(f"### Your Score: {score} / 3")
+        for label, chosen, correct in pairs:
+            if chosen == "— select —":
+                st.warning(f"⚠️ {label}: Not answered. Correct answer: **{correct}**")
+            elif chosen == correct:
+                st.success(f"✅ {label}: Correct!")
+            else:
+                st.error(f"❌ {label}: You chose '{chosen}'. Correct answer: **{correct}**")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -600,5 +635,3 @@ st.markdown("""
   <div style="color:#888;font-size:0.85rem">Learn at your own pace · Zero ads · Powered by AI · Created by Connor Burdick</div>
 </div>
 """, unsafe_allow_html=True)
-
-
