@@ -1,8 +1,8 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="Business Concept Builder",
-    page_icon="💡",
+    page_title="Echo English",
+    page_icon="🔊",
     layout="wide",
 )
 
@@ -171,7 +171,7 @@ h2, h3 {
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("### 💡 Business Concept")
+    st.markdown("### 🔊 Echo English")
     st.markdown("---")
     page = st.radio(
         "Navigate",
@@ -189,15 +189,15 @@ with st.sidebar:
     )
     st.markdown("---")
     st.markdown("**Creator:** Connor Burdick")
-    st.markdown("**Product:** AI English Learning Platform")
+    st.markdown("**Product:** Echo English")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # OVERVIEW
 # ══════════════════════════════════════════════════════════════════════════════
 if page == "🏠 Overview":
-    st.markdown('<div class="hero-badge">Business Concept Builder — Part 1</div>', unsafe_allow_html=True)
-    st.title("An AI-Powered English Learning Platform")
+    st.markdown('<div class="hero-badge">Echo English — Business Concept</div>', unsafe_allow_html=True)
+    st.title("Echo English")
     st.markdown("##### Helping non-English speakers hold conversations and land jobs — at their own pace, zero ads.")
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
@@ -573,4 +573,7 @@ elif page == "💬 Reflection":
     col1.metric("Problem Clarity", "9/10", "Well-defined & specific")
     col2.metric("Solution Originality", "8/10", "AI personalization edge")
     col3.metric("Market Potential", "10/10", "Massive global need")
+
+
+
 
