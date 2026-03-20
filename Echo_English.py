@@ -288,6 +288,8 @@ st.markdown("""
   <a href="#quick-review">Review</a>
   <a href="#ai-chat">AI Partner</a>
   <a href="#certificate">Certificate</a>
+  <a href="#pronunciation">Pronunciation</a>
+  <a href="#grammar">Grammar</a>
   <a href="#about">About</a>
 </div>
 """,unsafe_allow_html=True)
@@ -763,6 +765,288 @@ else:
             st.markdown(f'<a href="data:application/pdf;base64,{b64}" download="Echo_English_Certificate_{name_input.strip().replace(" ","_")}.pdf" style="background:#e85d2f;color:white;padding:12px 24px;font-family:Syne,sans-serif;font-weight:700;text-decoration:none;display:inline-block;box-shadow:3px 3px 0px #1a1a1a;letter-spacing:1px">⬇️ Download Certificate</a>',unsafe_allow_html=True)
 st.markdown('</div>',unsafe_allow_html=True)
 
+# PRONUNCIATION GUIDE
+st.markdown('<div id="pronunciation" class="section-wrap">',unsafe_allow_html=True)
+st.markdown('<div class="hero-badge">🔊 Pronunciation Guide</div>',unsafe_allow_html=True)
+st.title("Pronunciation Guide")
+st.markdown("##### Click any word to hear it spoken aloud. Practice until it sounds natural.")
+st.markdown('<hr class="divider">',unsafe_allow_html=True)
+
+st.markdown(f"""
+<div class="step-card" style="padding:16px 20px;margin-bottom:24px">
+  <div class="step-label">How it works</div>
+  <div style="font-size:0.88rem;color:{muted};line-height:1.8">
+    Click the <strong>🔊 Hear It</strong> button next to any word or phrase to hear it spoken aloud using your browser's built-in speech engine.
+    Use the <strong>Speed</strong> slider to slow it down if needed. Works best in Chrome.
+  </div>
+</div>
+""",unsafe_allow_html=True)
+
+pronunciation_data = {
+    "🔤 Commonly Mispronounced Words": [
+        ("Comfortable",     "KUM-fer-tuh-bul",  "Many people say 'com-FOR-ta-ble' — drop the middle syllable."),
+        ("Vegetable",       "VEJ-tuh-bul",      "3 syllables, not 4. Not 'veg-eh-TAH-bul'."),
+        ("February",        "FEB-roo-eh-ree",   "The first 'r' is often dropped in natural speech: 'FEB-yoo-ery'."),
+        ("Wednesday",       "WENZ-day",         "The 'd' is silent. Never say 'Wed-nes-day'."),
+        ("Pronunciation",   "pruh-NUN-see-AY-shun", "Not 'pro-NOUN-ciation'. The root changes spelling."),
+        ("Clothes",         "KLOHZ",            "The 'th' is silent. Sounds like 'close'."),
+        ("Choir",           "KWY-er",           "The 'ch' sounds like 'k'. Not 'cho-EER'."),
+        ("Colonel",         "KER-nel",          "Completely irregular — sounds like 'kernel'."),
+        ("Especially",      "eh-SPESH-uh-lee",  "Not 'ex-specially'. There is no 'x' sound."),
+        ("Probably",        "PROB-uh-blee",      "Often shortened to 'prob-lee' in fast natural speech."),
+    ],
+    "💼 Workplace Words": [
+        ("Schedule",        "SKEJ-yool (US) / SHED-yool (UK)", "Both are correct — depends on which English you are learning."),
+        ("Colleague",       "KOL-eeg",          "The 'ue' at the end is silent."),
+        ("Negotiate",       "neh-GOH-shee-ayt", "5 syllables. Stress is on the second syllable."),
+        ("Prioritize",      "pry-OR-ih-tyz",    "Stress on the second syllable, not the first."),
+        ("Demonstrate",     "DEM-un-strayt",    "Stress on the first syllable."),
+        ("Collaborate",     "kuh-LAB-uh-rayt",  "Stress on the second syllable."),
+        ("Appreciate",      "uh-PREE-shee-ayt", "5 syllables. Commonly mispronounced as 4."),
+        ("Enthusiastic",    "en-THYOO-zee-AS-tik", "6 syllables — take it slowly."),
+    ],
+    "🗣️ Tricky Sounds for Non-Native Speakers": [
+        ("Think / Thing",   "th- sound",        "Put your tongue between your teeth. Not 'tink' or 'sink'."),
+        ("This / That",     "voiced th- sound", "Same position but with voice. Not 'dis' or 'dat'."),
+        ("World",           "WERLD",            "The 'or' makes a 'er' sound. Not 'WOLD' or 'WORLD' with two syllables."),
+        ("Shirt / Sheet",   "short vs long 'ee'","'Shirt' has a short vowel. 'Sheet' is longer. Practice the difference."),
+        ("Beach / Bitch",   "long vs short 'ee'","Very different vowel lengths. Stress the long 'ee' in 'beach'."),
+        ("Vowel",           "VOW-ul",           "2 syllables. The 'w' is part of the first syllable."),
+        ("Rural",           "ROOR-ul",          "One of the hardest words — two 'r' sounds close together."),
+        ("Squirrel",        "SKWER-ul",         "Another tricky 'r' word. Practice slowly: sk-wer-ul."),
+    ],
+    "📞 Phrases for Work & Daily Life": [
+        ("Could you repeat that?",      "kud yoo reh-PEET that",     "Natural and polite way to ask someone to say it again."),
+        ("I'll get back to you.",        "yl get BAK too yoo",        "'I will' contracts to 'I'll' in natural speech."),
+        ("Let me check on that.",        "let mee CHEK on that",      "A safe professional phrase when you are unsure."),
+        ("What time works for you?",     "wut tym werks fer yoo",     "'For' reduces to 'fer' in fast natural speech."),
+        ("Nice to meet you.",            "NYS too MEET yoo",          "The 't' in 'meet' is often a soft tap in American English."),
+        ("How's it going?",              "howz it GOH-ing",           "Very common casual greeting. 'How is it' contracts to 'How's it'."),
+    ],
+}
+
+speed_js = """
+<script>
+function speakText(text, speed) {
+    window.speechSynthesis.cancel();
+    var msg = new SpeechSynthesisUtterance(text);
+    msg.rate = speed || 1.0;
+    msg.lang = 'en-US';
+    window.speechSynthesis.speak(msg);
+}
+</script>
+"""
+st.markdown(speed_js, unsafe_allow_html=True)
+
+pron_speed = st.slider("🐢 Playback Speed", min_value=0.5, max_value=1.5, value=1.0, step=0.1, key="pron_speed", help="Lower = slower. Try 0.7 for difficult words.")
+
+for category, words in pronunciation_data.items():
+    st.markdown(f"### {category}")
+    for word, phonetic, tip in words:
+        col_word, col_btn = st.columns([5, 1])
+        with col_word:
+            st.markdown(f"""
+            <div class="phrase-box" style="margin-bottom:4px">
+              <div style="display:flex;align-items:baseline;gap:10px">
+                <strong style="font-size:1.05rem;color:{fg}">{word}</strong>
+                <span style="font-size:0.82rem;color:#e85d2f;font-family:'Syne',sans-serif;font-weight:700">{phonetic}</span>
+              </div>
+              <div style="font-size:0.83rem;color:{muted};margin-top:4px">💡 {tip}</div>
+            </div>""", unsafe_allow_html=True)
+        with col_btn:
+            safe_word = word.replace("'", "\\'").replace('"', '\\"').split('/')[0].strip()
+            st.markdown(f"""
+            <div style="padding-top:8px">
+              <button onclick="speakText('{safe_word}', {pron_speed})"
+                style="background:#e85d2f;color:white;border:none;padding:8px 14px;
+                font-family:'Syne',sans-serif;font-weight:700;font-size:0.78rem;
+                cursor:pointer;box-shadow:2px 2px 0px {border};letter-spacing:1px">
+                🔊 Hear It
+              </button>
+            </div>""", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+
+st.markdown('</div>',unsafe_allow_html=True)
+
+# GRAMMAR GUIDE
+st.markdown('<div id="grammar" class="section-wrap">',unsafe_allow_html=True)
+st.markdown('<div class="hero-badge">📚 Grammar Guide</div>',unsafe_allow_html=True)
+st.title("Grammar Guide")
+st.markdown("##### Clear explanations of the most important English grammar rules — no jargon.")
+st.markdown('<hr class="divider">',unsafe_allow_html=True)
+
+grammar_topics = {
+    "⏰ Verb Tenses": [
+        {
+            "title": "Simple Present",
+            "use": "For habits, facts, and routines.",
+            "structure": "Subject + base verb (+ s/es for he/she/it)",
+            "examples": [
+                ("✅ I work every day.", "✅ She works at a hospital."),
+                ("❌ I am work every day.", "❌ She work at a hospital."),
+            ],
+            "tip": "Add -s or -es when the subject is he, she, or it.",
+        },
+        {
+            "title": "Simple Past",
+            "use": "For actions that are completely finished.",
+            "structure": "Subject + verb-ed (or irregular past form)",
+            "examples": [
+                ("✅ I worked yesterday.", "✅ She went to the store."),
+                ("❌ I work yesterday.", "❌ She goed to the store."),
+            ],
+            "tip": "Many common verbs are irregular: go→went, buy→bought, have→had, say→said.",
+        },
+        {
+            "title": "Present Continuous",
+            "use": "For actions happening right now, or temporary situations.",
+            "structure": "Subject + am/is/are + verb-ing",
+            "examples": [
+                ("✅ I am studying English.", "✅ She is working from home this week."),
+                ("❌ I studying English.", "❌ She working from home."),
+            ],
+            "tip": "You must include am/is/are. You cannot just use the -ing form alone.",
+        },
+        {
+            "title": "Present Perfect",
+            "use": "For past actions that connect to now, or life experiences.",
+            "structure": "Subject + have/has + past participle",
+            "examples": [
+                ("✅ I have lived here for 3 years.", "✅ She has finished the report."),
+                ("❌ I live here since 3 years.", "❌ She finished the report already. (if it still affects now)"),
+            ],
+            "tip": "Use 'for' with a period of time (for 3 years). Use 'since' with a start point (since 2020).",
+        },
+        {
+            "title": "Future: Will vs Going To",
+            "use": "'Will' for decisions made now or promises. 'Going to' for plans already made.",
+            "structure": "will + base verb / am-is-are + going to + base verb",
+            "examples": [
+                ("✅ I will help you. (decided just now)", "✅ I am going to visit my sister. (already planned)"),
+                ("❌ I will to go.", "❌ I going to visit."),
+            ],
+            "tip": "Both are correct future forms — the difference is about when you decided.",
+        },
+    ],
+    "📌 Articles: A, An, The": [
+        {
+            "title": "When to use 'A' and 'An'",
+            "use": "Use before singular countable nouns when mentioned for the first time.",
+            "structure": "A + consonant sound | An + vowel sound",
+            "examples": [
+                ("✅ I have a job.", "✅ She is an engineer."),
+                ("❌ I have job.", "❌ She is a engineer."),
+            ],
+            "tip": "It depends on the SOUND, not the letter. 'A university' (yoo-sound), 'An hour' (silent h).",
+        },
+        {
+            "title": "When to use 'The'",
+            "use": "Use when both speaker and listener know which thing you mean.",
+            "structure": "The + noun (singular or plural)",
+            "examples": [
+                ("✅ I saw a dog. The dog was friendly.", "✅ Please close the door."),
+                ("❌ I saw dog.", "❌ Please close door."),
+            ],
+            "tip": "Use 'the' for second mention, unique things (the sun, the internet), and specific things you both know.",
+        },
+        {
+            "title": "When to use NO article",
+            "use": "No article before plural nouns in general, and uncountable nouns in general.",
+            "structure": "No article + plural/uncountable noun",
+            "examples": [
+                ("✅ Dogs are friendly animals.", "✅ I drink coffee every morning."),
+                ("❌ The dogs are friendly animals. (in general)", "❌ I drink the coffee every morning."),
+            ],
+            "tip": "No article for general statements: 'I love music.' But 'I love the music at this party.' (specific)",
+        },
+    ],
+    "🔗 Prepositions of Time & Place": [
+        {
+            "title": "In / On / At — Time",
+            "use": "These three prepositions cover almost all time expressions.",
+            "structure": "IN (months, years, seasons) | ON (days, dates) | AT (specific times, holidays)",
+            "examples": [
+                ("✅ In January / in 2024 / in summer", "✅ On Monday / on March 5th"),
+                ("✅ At 3pm / at night / at Christmas", "❌ On January / in Monday / in 3pm"),
+            ],
+            "tip": "Think: big→small. IN for big periods, ON for days, AT for exact points.",
+        },
+        {
+            "title": "In / On / At — Place",
+            "use": "Use for locations and positions.",
+            "structure": "IN (enclosed spaces) | ON (surfaces, floors) | AT (specific points/addresses)",
+            "examples": [
+                ("✅ In the office / in a country", "✅ On the table / on the 3rd floor"),
+                ("✅ At the bus stop / at 42 Main Street", "❌ In the bus stop / on the country"),
+            ],
+            "tip": "AT is for a point (I'm at the bank). IN is for inside. ON is for surfaces.",
+        },
+    ],
+    "❓ Question Formation": [
+        {
+            "title": "Yes/No Questions",
+            "use": "Questions that can be answered with yes or no.",
+            "structure": "Auxiliary verb + subject + main verb",
+            "examples": [
+                ("✅ Do you work here?", "✅ Is she coming to the meeting?"),
+                ("❌ You work here?", "❌ She is coming to the meeting?"),
+            ],
+            "tip": "In English, you must invert the subject and auxiliary. You cannot just use a rising tone alone.",
+        },
+        {
+            "title": "Wh- Questions",
+            "use": "Questions asking for specific information.",
+            "structure": "Wh-word + auxiliary + subject + verb",
+            "examples": [
+                ("✅ Where do you work?", "✅ What time does it start?"),
+                ("❌ Where you work?", "❌ What time it starts?"),
+            ],
+            "tip": "The auxiliary (do/does/did/is/are) must come before the subject in questions.",
+        },
+    ],
+    "🔄 Countable vs Uncountable Nouns": [
+        {
+            "title": "Countable Nouns",
+            "use": "Things you can count. They have singular and plural forms.",
+            "structure": "1 job / 2 jobs | a mistake / mistakes",
+            "examples": [
+                ("✅ I made two mistakes.", "✅ Can I ask a question?"),
+                ("❌ I made two mistake.", "❌ Can I ask question?"),
+            ],
+            "tip": "If you can put a number in front of it, it's countable.",
+        },
+        {
+            "title": "Uncountable Nouns",
+            "use": "Things you cannot count directly. No plural form.",
+            "structure": "No article or 'some' | never 'a' or a number",
+            "examples": [
+                ("✅ I need some advice.", "✅ She gave me useful information."),
+                ("❌ I need an advice.", "❌ She gave me three informations."),
+            ],
+            "tip": "Common uncountables: advice, information, news, furniture, luggage, money, traffic, weather.",
+        },
+    ],
+}
+
+for topic, rules in grammar_topics.items():
+    st.markdown(f"### {topic}")
+    for rule in rules:
+        with st.expander(f"📖 {rule['title']}"):
+            col_a, col_b = st.columns([1, 1])
+            with col_a:
+                st.markdown(f'<div class="phrase-box" style="border-left-color:#8b5cf6"><strong>When to use it:</strong><br>{rule["use"]}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="phrase-box" style="border-left-color:#3b82f6"><strong>Structure:</strong><br><code>{rule["structure"]}</code></div>', unsafe_allow_html=True)
+            with col_b:
+                st.markdown(f'<div class="phrase-box" style="border-left-color:#f59e0b"><strong>💡 Tip:</strong><br>{rule["tip"]}</div>', unsafe_allow_html=True)
+            st.markdown("**Examples:**")
+            for ex_good, ex_bad in rule["examples"]:
+                ec1, ec2 = st.columns(2)
+                ec1.markdown(f'<div class="mistake-right" style="font-size:0.88rem">{ex_good}</div>', unsafe_allow_html=True)
+                ec2.markdown(f'<div class="mistake-wrong" style="font-size:0.88rem">{ex_bad}</div>', unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+
+st.markdown('</div>',unsafe_allow_html=True)
+
 # ABOUT
 st.markdown('<div id="about" class="section-wrap">',unsafe_allow_html=True)
 st.markdown('<div class="hero-badge">👋 About</div>',unsafe_allow_html=True)
@@ -774,7 +1058,7 @@ with ac1:
     st.markdown(f'<div class="step-card"><div class="step-label">The Mission</div><div class="step-title">What Echo English Is For</div><div style="font-size:0.97rem;line-height:1.8;color:{fg}">Echo English exists to close the language gap for immigrants, refugees, international students, and anyone navigating life in an English-speaking country.<br><br>The goal is simple: <strong>help people speak English confidently enough to get a job, make friends, and live the life they came here for.</strong></div></div>',unsafe_allow_html=True)
 with ac2:
     st.markdown(f'<div class="step-card" style="padding:22px 24px"><div class="step-label">Quick Facts</div><div style="font-size:0.9rem;line-height:2;color:{fg}">👤 <strong>Creator:</strong> Connor Burdick<br>🏫 <strong>Type:</strong> School Business Project<br>🌍 <strong>Target Users:</strong> Non-native English speakers<br>💻 <strong>Built With:</strong> Python + Streamlit<br>🤖 <strong>AI:</strong> Claude by Anthropic<br>🚫 <strong>Ads:</strong> Zero. Never.<br>📅 <strong>Launched:</strong> 2026</div></div>',unsafe_allow_html=True)
-    st.markdown(f'<div class="step-card" style="padding:22px 24px"><div class="step-label">What\'s Inside</div><div style="font-size:0.88rem;line-height:1.9;color:{fg}">📘 5 Learning Levels<br>🎯 Placement Quiz<br>🤖 AI Conversation Partner<br>🃏 Flashcard Mode<br>⚡ XP and Badge System<br>💼 5 Job Vocabulary Packs<br>⚠️ Common Mistakes Guide<br>🔍 Vocabulary Search<br>📊 Progress Tracker<br>🏆 Certificate of Completion</div></div>',unsafe_allow_html=True)
+    st.markdown(f'<div class="step-card" style="padding:22px 24px"><div class="step-label">What\'s Inside</div><div style="font-size:0.88rem;line-height:1.9;color:{fg}">📘 5 Learning Levels<br>🎯 Placement Quiz<br>🤖 AI Conversation Partner<br>🃏 Flashcard Mode<br>⚡ XP and Badge System<br>💼 5 Job Vocabulary Packs<br>⚠️ Common Mistakes Guide<br>🔍 Vocabulary Search<br>🔊 Pronunciation Guide<br>📚 Grammar Guide<br>📊 Progress Tracker<br>🏆 Certificate of Completion</div></div>',unsafe_allow_html=True)
 st.markdown('</div>',unsafe_allow_html=True)
 
 # FEEDBACK
@@ -804,7 +1088,7 @@ st.markdown(f"""
   <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:#e85d2f;margin-bottom:8px">🔊 Echo English</div>
   <div style="color:#888;font-size:0.85rem;margin-bottom:16px">Learn at your own pace · Zero ads · Powered by AI · Created by Connor Burdick</div>
   <div style="display:flex;justify-content:center;gap:20px;font-size:0.75rem;color:#555;flex-wrap:wrap">
-    <span>5 Levels</span><span>·</span><span>AI Partner</span><span>·</span><span>Flashcards</span><span>·</span><span>XP and Badges</span><span>·</span><span>Job Packs</span><span>·</span><span>Common Mistakes</span><span>·</span><span>Search</span><span>·</span><span>Certificate</span>
+    <span>5 Levels</span><span>·</span><span>AI Partner</span><span>·</span><span>Flashcards</span><span>·</span><span>XP and Badges</span><span>·</span><span>Job Packs</span><span>·</span><span>Pronunciation</span><span>·</span><span>Grammar Guide</span><span>·</span><span>Certificate</span>
   </div>
 </div>
 """,unsafe_allow_html=True)
