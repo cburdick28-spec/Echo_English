@@ -304,7 +304,7 @@ st.markdown('<div id="hero" class="hero-section">',unsafe_allow_html=True)
 st.markdown(f"""<div class="wotd-card"><span style="font-family:'Syne',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;opacity:0.8">📅 Word of the Day</span><br><span style="font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800">{wotd[0]}</span> <span style="font-size:0.8rem;opacity:0.8">({wotd[1]})</span><br><span style="font-size:0.95rem;opacity:0.9">{wotd[2]}</span><br><span style="font-size:0.85rem;opacity:0.75;font-style:italic">"{wotd[3]}"</span></div>""",unsafe_allow_html=True)
 st.markdown("<br>",unsafe_allow_html=True)
 st.markdown('<div class="hero-badge">🔊 Echo English</div>',unsafe_allow_html=True)
-st.markdown("""<div style="font-family:'Syne',sans-serif;font-size:4rem;font-weight:800;color:#f5f0e8;line-height:1.0;margin-bottom:18px">Speak English.<br>Get the Job.<br>Live Your Life.</div><div style="font-size:1.1rem;color:#a0a090;max-width:520px;line-height:1.7;margin-bottom:32px">A free, AI-powered English learning platform built for non-native speakers. No ads. No rigid schedules. Real conversations at your own pace — 24/7.</div>""",unsafe_allow_html=True)
+st.markdown("""<div style="font-family:'Syne',sans-serif;font-size:4rem;font-weight:800;color:#e85d2f;line-height:1.0;margin-bottom:18px">Speak English.<br>Get the Job.<br>Live Your Life.</div><div style="font-size:1.1rem;color:#a0a090;max-width:520px;line-height:1.7;margin-bottom:32px">A free, AI-powered English learning platform built for non-native speakers. No ads. No rigid schedules. Real conversations at your own pace — 24/7.</div>""",unsafe_allow_html=True)
 streak=st.session_state.streak
 xp=st.session_state.xp
 xp_lvl,xp_title,xp_next=xp_level(xp)
