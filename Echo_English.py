@@ -272,24 +272,15 @@ p,li,span{{color:{fg};}}
 st.markdown("""
 <div class="navbar">
   <a class="navbar-brand" href="#hero">🔊 Echo English</a>
-  <a href="#placement">Placement</a>
-  <a href="#progress">Progress</a>
-  <a href="#xp">XP & Badges</a>
-  <a href="#stories">Stories</a>
-  <a href="#level-1">L1</a>
-  <a href="#level-2">L2</a>
-  <a href="#level-3">L3</a>
-  <a href="#level-4">L4</a>
-  <a href="#level-5">L5</a>
-  <a href="#job-packs">Job Packs</a>
-  <a href="#mistakes">Mistakes</a>
-  <a href="#search">Search</a>
-  <a href="#flashcards">Flashcards</a>
-  <a href="#quick-review">Review</a>
-  <a href="#ai-chat">AI Partner</a>
-  <a href="#certificate">Certificate</a>
-  <a href="#pronunciation">Pronunciation</a>
-  <a href="#grammar">Grammar</a>
+  <a href="#how-to-use">How to Start</a>
+  <a href="#placement">📊 Placement Quiz</a>
+  <a href="#level-1">📘 Levels</a>
+  <a href="#flashcards">🃏 Flashcards</a>
+  <a href="#ai-chat">🤖 AI Partner</a>
+  <a href="#job-packs">💼 Job Packs</a>
+  <a href="#grammar">📚 Grammar</a>
+  <a href="#pronunciation">🔊 Pronunciation</a>
+  <a href="#certificate">🏆 Certificate</a>
   <a href="#about">About</a>
 </div>
 """,unsafe_allow_html=True)
@@ -322,7 +313,46 @@ for col,num,label in [(s1,"5","Learning Levels"),(s2,"AI","Conversation Partner"
     col.markdown(f'<div style="text-align:center;padding:16px;border-left:1px solid #2a2a2a"><div style="font-family:\'Syne\',sans-serif;font-size:2.2rem;font-weight:800;color:#e85d2f">{num}</div><div style="font-size:0.82rem;color:#888;margin-top:2px">{label}</div></div>',unsafe_allow_html=True)
 st.markdown('</div>',unsafe_allow_html=True)
 
-# PLACEMENT
+# HOW TO USE
+st.markdown('<div id="how-to-use" class="section-wrap">',unsafe_allow_html=True)
+st.markdown('<div class="hero-badge">👋 New Here?</div>',unsafe_allow_html=True)
+st.title("How to Use Echo English")
+st.markdown("##### Start here. This will take you 2 minutes to read — and save you a lot of confusion.")
+st.markdown('<hr class="divider">',unsafe_allow_html=True)
+
+steps = [
+    ("1", "🎯", "Take the Placement Quiz", "Not sure where to begin? Answer 5 quick questions and we will tell you exactly which level is right for you — Beginner, Elementary, Intermediate, Upper Intermediate, or Advanced.", "#placement"),
+    ("2", "📘", "Work Through Your Level", "Go to your recommended level. Read the vocabulary, study the phrases, then take the quiz at the end. Get a perfect score to mark the level complete and earn XP.", "#level-1"),
+    ("3", "🤖", "Practice with the AI Partner", "Type real English sentences and get instant feedback. Choose a scenario — job interview, shopping, meeting someone new — and practice at your own pace.", "#ai-chat"),
+    ("4", "🃏", "Use Flashcards to Remember Words", "Flip cards to test your memory. Shuffle the deck and work through words from any level. Great for a quick 5-minute study session.", "#flashcards"),
+    ("5", "💼", "Learn Job-Specific English", "Working in healthcare, a restaurant, construction, retail, or delivery? Open the Job Packs section and learn the exact words and phrases used in your industry.", "#job-packs"),
+    ("6", "🏆", "Earn Your Certificate", "Complete all 5 levels and download your official Echo English Certificate of Completion — with your name on it.", "#certificate"),
+]
+
+cols = st.columns(3)
+for i, (num, icon, title, desc, link) in enumerate(steps):
+    col = cols[i % 3]
+    col.markdown(f"""
+    <div class="step-card" style="height:100%">
+      <div style="font-family:'Syne',sans-serif;font-size:2rem;margin-bottom:6px">{icon}</div>
+      <div class="step-label">Step {num}</div>
+      <div class="step-title" style="font-size:1.05rem;margin-bottom:10px">{title}</div>
+      <div style="font-size:0.88rem;color:{muted};line-height:1.7">{desc}</div>
+    </div>""", unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+st.markdown(f"""
+<div class="step-card" style="background:#e85d2f;border-left:5px solid #1a1a1a;padding:20px 28px">
+  <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:white;margin-bottom:6px">💡 Quick Tip for New Users</div>
+  <div style="font-size:0.93rem;color:rgba(255,255,255,0.9);line-height:1.7">
+    If you are completely new to English — start with <strong>Level 1</strong>.<br>
+    If you already know some English — take the <strong>Placement Quiz</strong> first.<br>
+    If you are here to improve your work English — go straight to <strong>Job Packs</strong> or <strong>Level 4</strong>.
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown('</div>',unsafe_allow_html=True)
 st.markdown('<div id="placement" class="section-wrap">',unsafe_allow_html=True)
 st.markdown('<div class="hero-badge">Find Your Level</div>',unsafe_allow_html=True)
 st.title("Placement Quiz")
