@@ -810,7 +810,7 @@ pronunciation_data = {
         ("This / That",     "voiced th- sound", "Same position but with voice. Not 'dis' or 'dat'."),
         ("World",           "WERLD",            "The 'or' makes a 'er' sound. Not 'WOLD' or 'WORLD' with two syllables."),
         ("Shirt / Sheet",   "short vs long 'ee'","'Shirt' has a short vowel. 'Sheet' is longer. Practice the difference."),
-        ("Beach / Bitch",   "long vs short 'ee'","Very different vowel lengths. Stress the long 'ee' in 'beach'."),
+        ("Seat / Sit",      "long vs short 'ee'","'Seat' has a long 'ee' sound. 'Sit' is shorter. Practice the difference slowly."),
         ("Vowel",           "VOW-ul",           "2 syllables. The 'w' is part of the first syllable."),
         ("Rural",           "ROOR-ul",          "One of the hardest words — two 'r' sounds close together."),
         ("Squirrel",        "SKWER-ul",         "Another tricky 'r' word. Practice slowly: sk-wer-ul."),
