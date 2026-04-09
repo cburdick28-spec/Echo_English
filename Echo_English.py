@@ -1,3 +1,18 @@
+"""
+Echo English — AI-powered English learning platform.
+
+This single-file Streamlit application provides:
+  - A 5-level English curriculum (Beginner → Advanced)
+  - Placement quiz to determine starting level
+  - Spaced-repetition flashcards (SRS) per level
+  - AI conversation partner (powered by Claude)
+  - Job-specific vocabulary packs
+  - Grammar guide, pronunciation guide, and common-mistakes reference
+  - XP / badge gamification system with daily streak tracking
+  - Per-profile persistence via SQLite (user state, mistake log, SRS cards)
+  - PDF certificate of completion
+"""
+
 import streamlit as st
 import requests
 import datetime
@@ -10,8 +25,11 @@ from pathlib import Path
 
 st.set_page_config(page_title="Echo English", page_icon="🔊", layout="wide")
 
+# Path to the SQLite database file, stored alongside this script.
 DB_PATH = Path(__file__).with_name("echo_english.sqlite3")
 
+# Session-state keys that are saved to / loaded from the database for each
+# user profile so that progress survives page refreshes and browser sessions.
 PERSIST_KEYS = [
     "progress",
     "scores",
@@ -27,6 +45,11 @@ PERSIST_KEYS = [
 
 
 def _db():
+    """Open (or create) the SQLite database and return a connection.
+
+    WAL journal mode is enabled so that concurrent reads from multiple
+    Streamlit worker threads don't block each other.
+    """
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.execute("PRAGMA journal_mode=WAL;")
@@ -34,6 +57,13 @@ def _db():
 
 
 def init_db():
+    """Create the required database tables if they don't already exist.
+
+    Tables:
+      - user_state   : serialised session-state JSON per profile.
+      - mistakes     : log of wrong answers for the Mistake Notebook.
+      - srs_cards    : spaced-repetition card state (ease, interval, due date).
+    """
     conn = _db()
     conn.execute(
         """
@@ -79,6 +109,11 @@ def init_db():
 
 
 def persist_save():
+    """Serialise the current session state for the active profile to the DB.
+
+    Only the keys listed in PERSIST_KEYS are written. The function is a no-op
+    when autosave is disabled (e.g. during unit tests).
+    """
     if not st.session_state.get("autosave", True):
         return
     profile = (st.session_state.get("profile_name") or "Guest").strip() or "Guest"
@@ -96,8 +131,12 @@ def persist_save():
 
 
 def persist_load(profile_name: str):
-    profile = (profile_name or "Guest").strip() or "Guest"
-    conn = _db()
+    """Load a saved profile from the database into the current session state.
+
+    If no row exists for ``profile_name`` the function returns silently so the
+    app keeps its default values.  Integer dict keys (e.g. level numbers) are
+    restored because JSON serialisation converts them to strings.
+    """
     row = conn.execute(
         "SELECT state_json FROM user_state WHERE profile_name=?",
         (profile,),
@@ -119,7 +158,15 @@ def persist_load(profile_name: str):
 
 
 def record_mistake(*, source: str, level: int | None, question: str, chosen: str, correct: str):
-    profile = (st.session_state.get("profile_name") or "Guest").strip() or "Guest"
+    """Append a wrong answer to the mistakes table for the current profile.
+
+    Args:
+        source:   Section where the mistake occurred (e.g. "level_quiz", "quick_review").
+        level:    Curriculum level number, or None if not level-specific.
+        question: The question text shown to the user.
+        chosen:   The answer option the user selected.
+        correct:  The correct answer option.
+    """
     conn = _db()
     conn.execute(
         "INSERT INTO mistakes(profile_name, ts, source, level, question, chosen, correct) VALUES(?,?,?,?,?,?,?)",
@@ -136,6 +183,11 @@ def record_mistake(*, source: str, level: int | None, question: str, chosen: str
     conn.commit()
     conn.close()
 
+# ---------------------------------------------------------------------------
+# Session-state initialisation
+# Default values for every key used throughout the app. Streamlit preserves
+# these across reruns; they are only set once per browser session.
+# ---------------------------------------------------------------------------
 for key, default in {
     "profile_name": "Guest",
     "loaded_profile": False,
@@ -162,16 +214,24 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
+# Initialise the database and load the last saved state for this profile
+# on the very first run (loaded_profile guards against repeated loads).
 init_db()
 if not st.session_state.loaded_profile:
     persist_load(st.session_state.profile_name)
     st.session_state.loaded_profile = True
 
 def award_xp(amount):
+    """Add ``amount`` XP to the current session and persist the change."""
     st.session_state.xp += amount
     persist_save()
 
 def check_badges():
+    """Evaluate badge conditions and award any newly unlocked badges.
+
+    Returns a list of (icon, name, description) tuples for badges earned
+    during this call, so the UI can display a congratulations message.
+    """
     badges = st.session_state.badges
     xp = st.session_state.xp
     completed = sum(st.session_state.progress.values())
@@ -197,6 +257,7 @@ def check_badges():
     return new_badges
 
 def xp_level(xp):
+    """Return the (level_number, title, xp_needed_for_next_level) tuple for a given XP total."""
     if xp<50:   return 1,"Newcomer",50
     if xp<150:  return 2,"Explorer",150
     if xp<300:  return 3,"Learner",300
@@ -205,7 +266,12 @@ def xp_level(xp):
     return 6,"Master",999999
 
 def update_streak():
-    today = datetime.date.today()
+    """Update the daily practice streak counter and persist it.
+
+    - If today is the day after the last practice date, the streak increments.
+    - If the same day, the streak stays unchanged (no double-count).
+    - If more than one day has passed, the streak resets to 1.
+    """
     last = st.session_state.last_practice_date
     # last_practice_date may be loaded from JSON as a string; parse it back.
     if isinstance(last, str):
@@ -220,6 +286,12 @@ def update_streak():
     st.session_state.last_practice_date=today
     persist_save()
 
+# ---------------------------------------------------------------------------
+# Word of the Day
+# Each entry is (word, part_of_speech, definition, example_sentence).
+# A deterministic entry is chosen from the list using the day-of-year so
+# every user sees the same word on a given calendar day.
+# ---------------------------------------------------------------------------
 WORD_OF_DAY_LIST=[
     ("Persevere","verb","To continue doing something despite difficulty.","She persevered through the hard exam and passed."),
     ("Eloquent","adjective","Fluent and persuasive in speaking or writing.","He gave an eloquent speech at the ceremony."),
@@ -275,7 +347,18 @@ day_of_year=datetime.date.today().timetuple().tm_yday
 wotd=WORD_OF_DAY_LIST[day_of_year%len(WORD_OF_DAY_LIST)]
 
 def generate_certificate(name):
-    from reportlab.lib.pagesizes import landscape,A4
+    """Generate a PDF certificate of completion for the given learner name.
+
+    Uses ReportLab to draw a styled A4 landscape certificate with the Echo
+    English branding, the learner's name, all 5 level badges, and today's
+    issue date.
+
+    Args:
+        name: The learner's full name to print on the certificate.
+
+    Returns:
+        The raw PDF bytes ready to be offered as a download.
+    """
     from reportlab.pdfgen import canvas
     from reportlab.lib import colors
     buf=io.BytesIO()
@@ -353,6 +436,11 @@ def generate_certificate(name):
     buf.seek(0)
     return buf.read()
 
+# ---------------------------------------------------------------------------
+# Theme / colour palette
+# Colours are chosen based on the dark_mode flag so a single set of CSS
+# variables covers both light and dark themes throughout the page.
+# ---------------------------------------------------------------------------
 dm=st.session_state.dark_mode
 bg="#1a1a1a" if dm else "#f5f0e8"
 fg="#f5f0e8" if dm else "#1a1a1a"
@@ -361,8 +449,8 @@ sub_bg="#111111" if dm else "#f5f0e8"
 border="#3a3a3a" if dm else "#1a1a1a"
 muted="#aaaaaa" if dm else "#555555"
 
+# Inject global CSS that applies the chosen theme and custom component styles.
 st.markdown(f"""
-<style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Karla:wght@300;400;500&display=swap');
 html,body,[class*="css"]{{font-family:'Karla',sans-serif;}}
 .stApp{{background:{bg};color:{fg};}}
@@ -416,8 +504,8 @@ p,li,span{{color:{fg};}}
 </style>
 """,unsafe_allow_html=True)
 
+# Render the sticky top navigation bar with anchor links to each section.
 st.markdown("""
-<div class="navbar">
   <a class="navbar-brand" href="#hero">🔊 Echo English</a>
   <a href="#how-to-use">How to Start</a>
   <a href="#placement">📊 Placement Quiz</a>
@@ -433,7 +521,11 @@ st.markdown("""
 """,unsafe_allow_html=True)
 
 def _on_profile_change():
-    st.session_state.loaded_profile = False
+    """Reload session state from the database when the user switches profiles.
+
+    Clears the chat history so a previous user's conversation is not visible
+    to the new profile, then triggers a full rerun so all widgets refresh.
+    """
     persist_load(st.session_state.profile_name)
     st.session_state.loaded_profile = True
     st.session_state.chat_messages = []
@@ -637,7 +729,17 @@ for story in stories:
 st.markdown('</div>',unsafe_allow_html=True)
 
 def render_practice(level_num,questions,correct_answers):
-    max_score=len(questions)
+    """Render the multiple-choice quiz for a curriculum level and score it.
+
+    Displays each question as a radio widget.  When the user submits, the
+    function scores the answers, awards XP (20 base + 10 bonus for perfect),
+    updates the streak, checks for new badges, and records any mistakes.
+
+    Args:
+        level_num:       The curriculum level number (1–5).
+        questions:       List of (question_label, list_of_options) tuples.
+        correct_answers: List of correct answer strings in the same order.
+    """
     st.markdown("Answer all questions, then press **Submit** to see your score.")
     responses=[]
     for i,(q_label,opts) in enumerate(questions):
@@ -668,6 +770,15 @@ def render_practice(level_num,questions,correct_answers):
         for icon,name,desc in new_badges:
             st.success(f"🏅 New badge: {icon} **{name}** — {desc}")
 
+# ---------------------------------------------------------------------------
+# LEVEL_DATA — curriculum content for all 5 levels.
+#
+# Each level entry contains:
+#   "vocab"      : list of (category_name, [word, ...]) tuples
+#   "phrases"    : list of (section_name, [(english, spanish), ...]) tuples
+#   "flashcards" : list of (word, definition) pairs used by the SRS system
+#   "questions"  : list of (question_text, [options], correct_answer) tuples
+# ---------------------------------------------------------------------------
 LEVEL_DATA={
     1:{
         "vocab":[("Greetings",["Hello","Goodbye","Please","Thank you","Sorry","Yes","No","Excuse me"]),("Numbers",["One","Two","Three","Four","Five","Ten","Twenty","Hundred"]),("Colors",["Red","Blue","Green","White","Black","Yellow","Orange","Purple"]),("Family",["Mother","Father","Brother","Sister","Friend","Baby","Husband","Wife"]),("Places",["Home","School","Hospital","Store","Restaurant","Bank","Street","City"])],
@@ -701,6 +812,8 @@ LEVEL_DATA={
     },
 }
 
+# Build a flat vocabulary list from all level data for the search feature.
+# Each entry is (word_or_term, category_or_definition, level_number).
 ALL_VOCAB=[]
 for lvl_num,data in LEVEL_DATA.items():
     for cat,words in data["vocab"]:
@@ -804,8 +917,26 @@ for category,mistakes in mistake_categories.items():
     st.markdown("<br>",unsafe_allow_html=True)
 st.markdown('</div>',unsafe_allow_html=True)
 
-# SRS HELPERS
+# ---------------------------------------------------------------------------
+# SRS (Spaced Repetition System) helpers
+#
+# Cards follow a simplified SM-2 algorithm:
+#   - ease   : difficulty multiplier (starts at 2.5, clamped to [1.3, 3.0])
+#   - interval_days : days until the card is next shown
+#   - reps   : successful review count
+#   - lapses : number of times the card was forgotten ("Again")
+# ---------------------------------------------------------------------------
 def srs_seed_cards(profile_name: str, level: int, cards: list[tuple[str, str]]):
+    """Insert flashcards into the SRS table if they don't exist yet.
+
+    Uses INSERT … ON CONFLICT DO NOTHING so it is safe to call on every
+    page load without resetting existing card progress.
+
+    Args:
+        profile_name: The active user profile name.
+        level:        The curriculum level the cards belong to.
+        cards:        List of (word, definition) tuples to seed.
+    """
     today = datetime.date.today().isoformat()
     profile = (profile_name or "Guest").strip() or "Guest"
     conn = _db()
@@ -823,7 +954,15 @@ def srs_seed_cards(profile_name: str, level: int, cards: list[tuple[str, str]]):
 
 
 def srs_get_due(profile_name: str, level: int):
-    today = datetime.date.today().isoformat()
+    """Fetch the next card due for review for a profile and level.
+
+    Cards are returned in due-date then reps ascending order (oldest due /
+    least-reviewed first).  Returns None when nothing is due today.
+
+    Returns:
+        A (word, definition, ease, interval_days, reps, lapses, due_date)
+        tuple, or None if no cards are due.
+    """
     profile = (profile_name or "Guest").strip() or "Guest"
     conn = _db()
     row = conn.execute(
@@ -841,7 +980,7 @@ def srs_get_due(profile_name: str, level: int):
 
 
 def srs_get_stats(profile_name: str, level: int):
-    today = datetime.date.today().isoformat()
+    """Return (due_count, total_count) for a profile's cards at a given level."""
     profile = (profile_name or "Guest").strip() or "Guest"
     conn = _db()
     due = conn.execute(
@@ -857,7 +996,20 @@ def srs_get_stats(profile_name: str, level: int):
 
 
 def srs_rate(profile_name: str, level: int, word: str, rating: str):
-    today = datetime.date.today()
+    """Update the SRS card state after the user rates their recall.
+
+    Rating options and their effects on the SM-2 parameters:
+      "again" : ease decreases, interval resets to 0, lapses increments.
+      "hard"  : ease decreases slightly, interval grows by ×1.2.
+      "good"  : interval grows by ×ease (standard SM-2 step).
+      "easy"  : ease increases, interval grows by ×ease×1.3.
+
+    Args:
+        profile_name: The active user profile name.
+        level:        The curriculum level the card belongs to.
+        word:         The card's word (primary key component).
+        rating:       One of "again", "hard", "good", or "easy".
+    """
     profile = (profile_name or "Guest").strip() or "Guest"
     conn = _db()
     row = conn.execute(
