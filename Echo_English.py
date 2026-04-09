@@ -109,6 +109,10 @@ def persist_load(profile_name: str):
         data = json.loads(row[0])
     except Exception:
         return
+    # JSON converts integer dict keys to strings; restore them for known int-keyed dicts.
+    for key in ("progress", "scores", "flashcard_index"):
+        if key in data and isinstance(data[key], dict):
+            data[key] = {int(k): v for k, v in data[key].items()}
     for k, v in data.items():
         if k in PERSIST_KEYS:
             st.session_state[k] = v
@@ -203,6 +207,12 @@ def xp_level(xp):
 def update_streak():
     today = datetime.date.today()
     last = st.session_state.last_practice_date
+    # last_practice_date may be loaded from JSON as a string; parse it back.
+    if isinstance(last, str):
+        try:
+            last = datetime.date.fromisoformat(last)
+        except (ValueError, AttributeError):
+            last = None
     if last is None: st.session_state.streak=1
     elif last==today: pass
     elif last==today-datetime.timedelta(days=1): st.session_state.streak+=1
