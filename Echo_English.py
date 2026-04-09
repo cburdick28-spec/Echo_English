@@ -4,10 +4,138 @@ import datetime
 import random
 import io
 import base64
+import json
+import sqlite3
+from pathlib import Path
 
 st.set_page_config(page_title="Echo English", page_icon="🔊", layout="wide")
 
+DB_PATH = Path(__file__).with_name("echo_english.sqlite3")
+
+PERSIST_KEYS = [
+    "progress",
+    "scores",
+    "placement_done",
+    "placement_result",
+    "placement_answers",
+    "streak",
+    "last_practice_date",
+    "dark_mode",
+    "xp",
+    "badges",
+]
+
+
+def _db():
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    conn.execute("PRAGMA journal_mode=WAL;")
+    return conn
+
+
+def init_db():
+    conn = _db()
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_state (
+            profile_name TEXT PRIMARY KEY,
+            state_json TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS mistakes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            profile_name TEXT NOT NULL,
+            ts TEXT NOT NULL,
+            source TEXT NOT NULL,
+            level INTEGER,
+            question TEXT,
+            chosen TEXT,
+            correct TEXT
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS srs_cards (
+            profile_name TEXT NOT NULL,
+            level INTEGER NOT NULL,
+            word TEXT NOT NULL,
+            definition TEXT NOT NULL,
+            ease REAL NOT NULL,
+            interval_days INTEGER NOT NULL,
+            due_date TEXT NOT NULL,
+            reps INTEGER NOT NULL,
+            lapses INTEGER NOT NULL,
+            PRIMARY KEY (profile_name, level, word)
+        )
+        """
+    )
+    conn.commit()
+    conn.close()
+
+
+def persist_save():
+    if not st.session_state.get("autosave", True):
+        return
+    profile = (st.session_state.get("profile_name") or "Guest").strip() or "Guest"
+    payload = {}
+    for k in PERSIST_KEYS:
+        payload[k] = st.session_state.get(k)
+    conn = _db()
+    conn.execute(
+        "INSERT INTO user_state(profile_name, state_json, updated_at) VALUES(?,?,?) "
+        "ON CONFLICT(profile_name) DO UPDATE SET state_json=excluded.state_json, updated_at=excluded.updated_at",
+        (profile, json.dumps(payload, default=str), datetime.datetime.utcnow().isoformat()),
+    )
+    conn.commit()
+    conn.close()
+
+
+def persist_load(profile_name: str):
+    profile = (profile_name or "Guest").strip() or "Guest"
+    conn = _db()
+    row = conn.execute(
+        "SELECT state_json FROM user_state WHERE profile_name=?",
+        (profile,),
+    ).fetchone()
+    conn.close()
+    if not row:
+        return
+    try:
+        data = json.loads(row[0])
+    except Exception:
+        return
+    for k, v in data.items():
+        if k in PERSIST_KEYS:
+            st.session_state[k] = v
+
+
+def record_mistake(*, source: str, level: int | None, question: str, chosen: str, correct: str):
+    profile = (st.session_state.get("profile_name") or "Guest").strip() or "Guest"
+    conn = _db()
+    conn.execute(
+        "INSERT INTO mistakes(profile_name, ts, source, level, question, chosen, correct) VALUES(?,?,?,?,?,?,?)",
+        (
+            profile,
+            datetime.datetime.utcnow().isoformat(),
+            source,
+            level,
+            question,
+            chosen,
+            correct,
+        ),
+    )
+    conn.commit()
+    conn.close()
+
 for key, default in {
+    "profile_name": "Guest",
+    "loaded_profile": False,
+    "autosave": True,
     "chat_messages": [],
     "progress": {1: False, 2: False, 3: False, 4: False, 5: False},
     "scores": {1: None, 2: None, 3: None, 4: None, 5: None},
@@ -30,8 +158,14 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
+init_db()
+if not st.session_state.loaded_profile:
+    persist_load(st.session_state.profile_name)
+    st.session_state.loaded_profile = True
+
 def award_xp(amount):
     st.session_state.xp += amount
+    persist_save()
 
 def check_badges():
     badges = st.session_state.badges
@@ -54,6 +188,8 @@ def check_badges():
             if condition():
                 new_badges.append((icon,name,desc))
                 st.session_state.badges.append((icon,name,desc))
+    if new_badges:
+        persist_save()
     return new_badges
 
 def xp_level(xp):
@@ -72,6 +208,7 @@ def update_streak():
     elif last==today-datetime.timedelta(days=1): st.session_state.streak+=1
     else: st.session_state.streak=1
     st.session_state.last_practice_date=today
+    persist_save()
 
 WORD_OF_DAY_LIST=[
     ("Persevere","verb","To continue doing something despite difficulty.","She persevered through the hard exam and passed."),
@@ -285,10 +422,21 @@ st.markdown("""
 </div>
 """,unsafe_allow_html=True)
 
-dm_col1,dm_col2=st.columns([9,1])
+def _on_profile_change():
+    st.session_state.loaded_profile = False
+    persist_load(st.session_state.profile_name)
+    st.session_state.loaded_profile = True
+    st.session_state.chat_messages = []
+    st.rerun()
+
+dm_col1,dm_col2,dm_col3=st.columns([6,2,1])
 with dm_col2:
+    st.text_input("Profile", key="profile_name", label_visibility="collapsed", placeholder="Profile (e.g. Maria)", on_change=_on_profile_change)
+with dm_col3:
     if st.button("🌙" if not dm else "☀️",key="dm_toggle"):
-        st.session_state.dark_mode=not st.session_state.dark_mode; st.rerun()
+        st.session_state.dark_mode=not st.session_state.dark_mode
+        persist_save()
+        st.rerun()
 
 # HERO
 st.markdown('<div id="hero" class="hero-section">',unsafe_allow_html=True)
@@ -424,7 +572,10 @@ if completed>0:
     if st.button("Reset All Progress",key="reset_progress"):
         st.session_state.progress={1:False,2:False,3:False,4:False,5:False}
         st.session_state.scores={1:None,2:None,3:None,4:None,5:None}
-        st.session_state.xp=0; st.session_state.badges=[]; st.rerun()
+        st.session_state.xp=0
+        st.session_state.badges=[]
+        persist_save()
+        st.rerun()
 st.markdown('</div>',unsafe_allow_html=True)
 
 # XP & BADGES
@@ -490,12 +641,18 @@ def render_practice(level_num,questions,correct_answers):
         award_xp(20)
         if score==max_score: award_xp(10)
         new_badges=check_badges()
+        persist_save()
         st.markdown(f"### Your Score: {score} / {max_score}")
         for i,(r,c) in enumerate(zip(responses,correct_answers)):
             lbl=f"Q{i+1}"
             if r=="— select —": st.warning(f"⚠️ {lbl}: Not answered. Answer: **{c}**")
             elif r==c: st.success(f"✅ {lbl}: Correct!")
-            else: st.error(f"❌ {lbl}: You chose '{r}'. Answer: **{c}**")
+            else:
+                st.error(f"❌ {lbl}: You chose '{r}'. Answer: **{c}**")
+                try:
+                    record_mistake(source="level_quiz", level=level_num, question=q_label, chosen=r, correct=c)
+                except Exception:
+                    pass
         if score==max_score: st.balloons(); st.success("🎉 Perfect score! +30 XP earned!")
         else: st.info(f"+20 XP earned!")
         for icon,name,desc in new_badges:
@@ -637,6 +794,108 @@ for category,mistakes in mistake_categories.items():
     st.markdown("<br>",unsafe_allow_html=True)
 st.markdown('</div>',unsafe_allow_html=True)
 
+# SRS HELPERS
+def srs_seed_cards(profile_name: str, level: int, cards: list[tuple[str, str]]):
+    today = datetime.date.today().isoformat()
+    profile = (profile_name or "Guest").strip() or "Guest"
+    conn = _db()
+    for word, definition in cards:
+        conn.execute(
+            """
+            INSERT INTO srs_cards(profile_name, level, word, definition, ease, interval_days, due_date, reps, lapses)
+            VALUES(?,?,?,?,?,?,?,?,?)
+            ON CONFLICT(profile_name, level, word) DO NOTHING
+            """,
+            (profile, level, word, definition, 2.5, 0, today, 0, 0),
+        )
+    conn.commit()
+    conn.close()
+
+
+def srs_get_due(profile_name: str, level: int):
+    today = datetime.date.today().isoformat()
+    profile = (profile_name or "Guest").strip() or "Guest"
+    conn = _db()
+    row = conn.execute(
+        """
+        SELECT word, definition, ease, interval_days, reps, lapses, due_date
+        FROM srs_cards
+        WHERE profile_name=? AND level=? AND due_date<=?
+        ORDER BY due_date ASC, reps ASC
+        LIMIT 1
+        """,
+        (profile, level, today),
+    ).fetchone()
+    conn.close()
+    return row
+
+
+def srs_get_stats(profile_name: str, level: int):
+    today = datetime.date.today().isoformat()
+    profile = (profile_name or "Guest").strip() or "Guest"
+    conn = _db()
+    due = conn.execute(
+        "SELECT COUNT(*) FROM srs_cards WHERE profile_name=? AND level=? AND due_date<=?",
+        (profile, level, today),
+    ).fetchone()[0]
+    total = conn.execute(
+        "SELECT COUNT(*) FROM srs_cards WHERE profile_name=? AND level=?",
+        (profile, level),
+    ).fetchone()[0]
+    conn.close()
+    return due, total
+
+
+def srs_rate(profile_name: str, level: int, word: str, rating: str):
+    today = datetime.date.today()
+    profile = (profile_name or "Guest").strip() or "Guest"
+    conn = _db()
+    row = conn.execute(
+        """
+        SELECT ease, interval_days, reps, lapses
+        FROM srs_cards
+        WHERE profile_name=? AND level=? AND word=?
+        """,
+        (profile, level, word),
+    ).fetchone()
+    if not row:
+        conn.close()
+        return
+    ease, interval_days, reps, lapses = row
+
+    if rating == "again":
+        ease = max(1.3, ease - 0.2)
+        interval_days = 0
+        reps = max(0, reps - 1)
+        lapses += 1
+        due_date = today.isoformat()
+    elif rating == "hard":
+        ease = max(1.3, ease - 0.15)
+        interval_days = max(1, int(max(1, interval_days) * 1.2))
+        reps += 1
+        due_date = (today + datetime.timedelta(days=interval_days)).isoformat()
+    elif rating == "easy":
+        ease = min(3.0, ease + 0.1)
+        interval_days = max(2, int(max(1, interval_days) * ease * 1.3))
+        reps += 1
+        due_date = (today + datetime.timedelta(days=interval_days)).isoformat()
+    else:  # good
+        interval_days = max(1, int(max(1, interval_days) * ease))
+        reps += 1
+        due_date = (today + datetime.timedelta(days=interval_days)).isoformat()
+
+    conn.execute(
+        """
+        UPDATE srs_cards
+        SET ease=?, interval_days=?, due_date=?, reps=?, lapses=?
+        WHERE profile_name=? AND level=? AND word=?
+        """,
+        (ease, interval_days, due_date, reps, lapses, profile, level, word),
+    )
+    conn.commit()
+    conn.close()
+
+
 # SEARCH
 st.markdown('<div id="search" class="section-wrap">',unsafe_allow_html=True)
 st.markdown('<div class="hero-badge">🔍 Search</div>',unsafe_allow_html=True)
@@ -662,27 +921,55 @@ st.markdown('</div>',unsafe_allow_html=True)
 # FLASHCARDS
 st.markdown('<div id="flashcards" class="section-wrap">',unsafe_allow_html=True)
 st.markdown('<div class="hero-badge">🃏 Flashcards</div>',unsafe_allow_html=True)
-st.title("Flashcard Mode")
-st.markdown("##### Flip cards to test your memory.")
+st.title("Spaced Repetition Flashcards")
+st.markdown("##### Review the cards that are due today (this is how you remember words long-term).")
 st.markdown('<hr class="divider">',unsafe_allow_html=True)
 fc_level=st.selectbox("Choose a level",[1,2,3,4,5],format_func=lambda x:f"Level {x} — {level_meta[x-1][2]}",key="fc_level_select")
+profile = (st.session_state.get("profile_name") or "Guest").strip() or "Guest"
 cards=LEVEL_DATA[fc_level]["flashcards"]
-idx=st.session_state.flashcard_index[fc_level]%len(cards)
-flipped=st.session_state.flashcard_flipped
-word,definition=cards[idx]
+srs_seed_cards(profile, fc_level, cards)
+due_count,total_count=srs_get_stats(profile, fc_level)
+st.markdown(f"**Due now:** {due_count} · **Total cards:** {total_count}")
+
+row=srs_get_due(profile, fc_level)
 col_card,col_nav=st.columns([3,1])
 with col_card:
-    if not flipped:
-        st.markdown(f'<div class="flashcard"><div style="font-family:\'Syne\',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#e85d2f;margin-bottom:12px">WORD</div><div style="font-family:\'Syne\',sans-serif;font-size:2.2rem;font-weight:800;color:{fg}">{word}</div><div style="font-size:0.82rem;color:{muted};margin-top:12px">Click Flip to see the definition</div></div>',unsafe_allow_html=True)
+    if not row:
+        st.markdown(f'<div class="step-card"><div class="step-label">All caught up</div><div style="color:{muted}">No cards due right now for this level. Come back tomorrow to keep the streak!</div></div>',unsafe_allow_html=True)
     else:
-        st.markdown(f'<div class="flashcard" style="background:#e85d2f;border-color:#e85d2f;box-shadow:6px 6px 0px {border}"><div style="font-family:\'Syne\',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:12px">DEFINITION</div><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:700;color:white;text-align:center;line-height:1.4">{definition}</div><div style="font-size:0.78rem;color:rgba(255,255,255,0.6);margin-top:12px;font-style:italic">{word}</div></div>',unsafe_allow_html=True)
-    st.markdown(f'<div style="color:{muted};font-size:0.8rem;margin-top:8px;text-align:center">Card {idx+1} of {len(cards)}</div>',unsafe_allow_html=True)
+        word,definition,ease,interval_days,reps,lapses,due_date=row
+        flipped=st.session_state.flashcard_flipped
+        if not flipped:
+            st.markdown(f'<div class="flashcard"><div style="font-family:\'Syne\',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#e85d2f;margin-bottom:12px">WORD</div><div style="font-family:\'Syne\',sans-serif;font-size:2.2rem;font-weight:800;color:{fg}">{word}</div><div style="font-size:0.82rem;color:{muted};margin-top:12px">Click Flip, then rate it</div></div>',unsafe_allow_html=True)
+        else:
+            st.markdown(f'<div class="flashcard" style="background:#e85d2f;border-color:#e85d2f;box-shadow:6px 6px 0px {border}"><div style="font-family:\'Syne\',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:12px">DEFINITION</div><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:700;color:white;text-align:center;line-height:1.4">{definition}</div><div style="font-size:0.78rem;color:rgba(255,255,255,0.6);margin-top:12px;font-style:italic">{word}</div></div>',unsafe_allow_html=True)
+        st.markdown(f'<div style="color:{muted};font-size:0.78rem;margin-top:8px;text-align:center">Ease: {round(ease,2)} · Interval: {interval_days} day(s) · Reps: {reps} · Lapses: {lapses}</div>',unsafe_allow_html=True)
 with col_nav:
     st.markdown("<br><br>",unsafe_allow_html=True)
-    if st.button("🔄 Flip",key="fc_flip"): st.session_state.flashcard_flipped=not st.session_state.flashcard_flipped; st.rerun()
-    if st.button("➡️ Next",key="fc_next"): st.session_state.flashcard_index[fc_level]=(idx+1)%len(cards); st.session_state.flashcard_flipped=False; st.rerun()
-    if st.button("⬅️ Prev",key="fc_prev"): st.session_state.flashcard_index[fc_level]=(idx-1)%len(cards); st.session_state.flashcard_flipped=False; st.rerun()
-    if st.button("🔀 Shuffle",key="fc_shuffle"): st.session_state.flashcard_index[fc_level]=random.randint(0,len(cards)-1); st.session_state.flashcard_flipped=False; st.rerun()
+    if st.button("🔄 Flip",key="fc_flip"):
+        st.session_state.flashcard_flipped=not st.session_state.flashcard_flipped
+        st.rerun()
+    if row:
+        if st.button("🔁 Again", key="fc_again"):
+            srs_rate(profile, fc_level, row[0], "again")
+            award_xp(2)
+            st.session_state.flashcard_flipped=False
+            st.rerun()
+        if st.button("😓 Hard", key="fc_hard"):
+            srs_rate(profile, fc_level, row[0], "hard")
+            award_xp(3)
+            st.session_state.flashcard_flipped=False
+            st.rerun()
+        if st.button("🙂 Good", key="fc_good"):
+            srs_rate(profile, fc_level, row[0], "good")
+            award_xp(4)
+            st.session_state.flashcard_flipped=False
+            st.rerun()
+        if st.button("😎 Easy", key="fc_easy"):
+            srs_rate(profile, fc_level, row[0], "easy")
+            award_xp(5)
+            st.session_state.flashcard_flipped=False
+            st.rerun()
 st.markdown('</div>',unsafe_allow_html=True)
 
 # QUICK REVIEW
@@ -713,18 +1000,78 @@ else:
             correct=sum(1 for i,(_,_,_,ans) in enumerate(st.session_state.quick_review_questions) if review_responses.get(i)==ans)
             st.session_state.quick_review_answers=review_responses; st.session_state.quick_review_done=True
             award_xp(15); new_badges=check_badges()
+            persist_save()
             st.markdown(f"### Score: {correct} / {len(st.session_state.quick_review_questions)}")
             for i,(lvl,q,opts,ans) in enumerate(st.session_state.quick_review_questions):
                 chosen=review_responses.get(i,"— select —")
                 if chosen==ans: st.success(f"✅ Q{i+1}: Correct!")
                 elif chosen=="— select —": st.warning(f"⚠️ Q{i+1}: Not answered. Answer: **{ans}**")
-                else: st.error(f"❌ Q{i+1}: You chose '{chosen}'. Answer: **{ans}**")
+                else:
+                    st.error(f"❌ Q{i+1}: You chose '{chosen}'. Answer: **{ans}**")
+                    try:
+                        record_mistake(source="quick_review", level=lvl, question=q, chosen=chosen, correct=ans)
+                    except Exception:
+                        pass
             if correct==len(st.session_state.quick_review_questions): st.balloons()
             st.info("+15 XP earned!")
             for icon,name,desc in new_badges: st.success(f"🏅 New badge: {icon} **{name}** — {desc}")
     else:
         st.success("✅ Review complete!")
     if st.button("🔀 New Review Set",key="qr_new"): st.session_state.quick_review_questions=[]; st.session_state.quick_review_done=False; st.rerun()
+st.markdown('</div>',unsafe_allow_html=True)
+
+# MISTAKE NOTEBOOK
+st.markdown('<div id="mistake-notebook" class="section-wrap">',unsafe_allow_html=True)
+st.markdown('<div class="hero-badge">🗒️ Your Mistake Notebook</div>',unsafe_allow_html=True)
+st.title("Mistake Notebook")
+st.markdown("##### Every wrong answer you submit gets saved here so you can improve faster.")
+st.markdown('<hr class="divider">',unsafe_allow_html=True)
+
+profile = (st.session_state.get("profile_name") or "Guest").strip() or "Guest"
+conn = _db()
+rows = conn.execute(
+    """
+    SELECT ts, source, level, question, chosen, correct
+    FROM mistakes
+    WHERE profile_name=?
+    ORDER BY ts DESC
+    LIMIT 50
+    """,
+    (profile,),
+).fetchall()
+conn.close()
+
+if not rows:
+    st.markdown(f'<div class="step-card"><div class="step-label">Nothing yet</div><div style="color:{muted}">Take a level quiz or Quick Review and your mistakes will show up here.</div></div>',unsafe_allow_html=True)
+else:
+    st.markdown(f"**Showing your latest {len(rows)} mistake(s).**")
+    by_key = {}
+    for ts, source, lvl, q, chosen, correct in rows:
+        k = (lvl, q, correct)
+        by_key[k] = by_key.get(k, 0) + 1
+    worst = sorted(by_key.items(), key=lambda x: x[1], reverse=True)[:5]
+    if worst:
+        st.markdown("### Your top recurring mistakes")
+        for (lvl, q, correct), count in worst:
+            st.markdown(
+                f'<div class="mistake-card"><div class="step-label">Repeated {count}×</div><div style="font-family:\'Syne\',sans-serif;font-weight:800;color:{fg}">{q}</div><div style="color:{muted};margin-top:6px">✅ Correct answer: <strong>{correct}</strong>{"" if not lvl else f" · Level {lvl}"}</div></div>',
+                unsafe_allow_html=True,
+            )
+    st.markdown("### Recent mistakes")
+    for ts, source, lvl, q, chosen, correct in rows[:20]:
+        lvl_txt = f"Level {lvl}" if lvl else "—"
+        st.markdown(
+            f'<div class="mistake-card"><div style="display:flex;gap:10px;align-items:center"><div class="step-label">{source.replace("_"," ").upper()}</div><div style="color:{muted};font-size:0.78rem">{lvl_txt}</div></div><div style="margin-top:6px;color:{fg}"><strong>Q:</strong> {q}</div><div class="mistake-wrong">❌ You chose: {chosen}</div><div class="mistake-right">✅ Correct: {correct}</div></div>',
+            unsafe_allow_html=True,
+        )
+
+if st.button("🧹 Clear my mistake notebook", key="clear_mistakes"):
+    conn = _db()
+    conn.execute("DELETE FROM mistakes WHERE profile_name=?", (profile,))
+    conn.commit()
+    conn.close()
+    st.rerun()
+
 st.markdown('</div>',unsafe_allow_html=True)
 
 # AI CHAT
