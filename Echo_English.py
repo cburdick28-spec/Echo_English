@@ -137,6 +137,8 @@ def persist_load(profile_name: str):
     app keeps its default values.  Integer dict keys (e.g. level numbers) are
     restored because JSON serialisation converts them to strings.
     """
+    profile = (profile_name or "Guest").strip() or "Guest"
+    conn = _db()
     row = conn.execute(
         "SELECT state_json FROM user_state WHERE profile_name=?",
         (profile,),
@@ -167,6 +169,7 @@ def record_mistake(*, source: str, level: int | None, question: str, chosen: str
         chosen:   The answer option the user selected.
         correct:  The correct answer option.
     """
+    profile = (st.session_state.get("profile_name") or "Guest").strip() or "Guest"
     conn = _db()
     conn.execute(
         "INSERT INTO mistakes(profile_name, ts, source, level, question, chosen, correct) VALUES(?,?,?,?,?,?,?)",
@@ -272,6 +275,7 @@ def update_streak():
     - If the same day, the streak stays unchanged (no double-count).
     - If more than one day has passed, the streak resets to 1.
     """
+    today = datetime.date.today()
     last = st.session_state.last_practice_date
     # last_practice_date may be loaded from JSON as a string; parse it back.
     if isinstance(last, str):
@@ -359,6 +363,7 @@ def generate_certificate(name):
     Returns:
         The raw PDF bytes ready to be offered as a download.
     """
+    from reportlab.lib.pagesizes import landscape,A4
     from reportlab.pdfgen import canvas
     from reportlab.lib import colors
     buf=io.BytesIO()
@@ -526,6 +531,7 @@ def _on_profile_change():
     Clears the chat history so a previous user's conversation is not visible
     to the new profile, then triggers a full rerun so all widgets refresh.
     """
+    st.session_state.loaded_profile = False
     persist_load(st.session_state.profile_name)
     st.session_state.loaded_profile = True
     st.session_state.chat_messages = []
@@ -740,6 +746,7 @@ def render_practice(level_num,questions,correct_answers):
         questions:       List of (question_label, list_of_options) tuples.
         correct_answers: List of correct answer strings in the same order.
     """
+    max_score=len(questions)
     st.markdown("Answer all questions, then press **Submit** to see your score.")
     responses=[]
     for i,(q_label,opts) in enumerate(questions):
@@ -963,6 +970,7 @@ def srs_get_due(profile_name: str, level: int):
         A (word, definition, ease, interval_days, reps, lapses, due_date)
         tuple, or None if no cards are due.
     """
+    today = datetime.date.today().isoformat()
     profile = (profile_name or "Guest").strip() or "Guest"
     conn = _db()
     row = conn.execute(
@@ -981,6 +989,7 @@ def srs_get_due(profile_name: str, level: int):
 
 def srs_get_stats(profile_name: str, level: int):
     """Return (due_count, total_count) for a profile's cards at a given level."""
+    today = datetime.date.today().isoformat()
     profile = (profile_name or "Guest").strip() or "Guest"
     conn = _db()
     due = conn.execute(
@@ -1010,6 +1019,7 @@ def srs_rate(profile_name: str, level: int, word: str, rating: str):
         word:         The card's word (primary key component).
         rating:       One of "again", "hard", "good", or "easy".
     """
+    today = datetime.date.today()
     profile = (profile_name or "Guest").strip() or "Guest"
     conn = _db()
     row = conn.execute(
