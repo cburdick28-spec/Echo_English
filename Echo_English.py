@@ -539,7 +539,7 @@ def _on_profile_change():
 
 dm_col1,dm_col2,dm_col3=st.columns([6,2,1])
 with dm_col2:
-    st.text_input("Profile", key="profile_name", label_visibility="collapsed", placeholder="Profile (e.g. Maria)", on_change=_on_profile_change, help="Enter your name to save your progress. Each profile keeps its own XP, badges, quiz scores, and flashcard history — so multiple people can use the same device.")
+    st.text_input("Profile", key="profile_name", label_visibility="collapsed", placeholder="Profile (e.g. Maria)", on_change=_on_profile_change, help="Enter your name to save progress. Each profile keeps separate XP, badges, and quiz scores.")
 with dm_col3:
     if st.button("🌙" if not dm else "☀️",key="dm_toggle"):
         st.session_state.dark_mode=not st.session_state.dark_mode
@@ -677,7 +677,7 @@ for num,icon,label in [(1,"📘","Beginner"),(2,"📗","Elementary"),(3,"📙","
     status=f"✅ Completed — Score: {score}/6" if done else "⬜ Not yet completed"
     st.markdown(f'<div class="progress-level-card"><span style="font-size:1.8rem">{icon}</span><div style="flex:1"><div style="font-family:\'Syne\',sans-serif;font-weight:800;color:{fg}">Level {num} — {label}</div><div style="color:{muted};font-size:0.83rem;margin-top:3px">{status}</div></div><div style="width:100px"><div style="background:{"#3a3a3a" if dm else "#d0c8b8"};height:7px"><div style="background:{color};height:7px;width:{"100%" if done else "0%"}"></div></div></div></div>',unsafe_allow_html=True)
 if completed>0:
-    if st.button("Reset All Progress",key="reset_progress", help="⚠️ Permanently deletes all level completions, quiz scores, XP, and badges for this profile. This cannot be undone."):
+    if st.button("Reset All Progress",key="reset_progress", help="⚠️ Permanently deletes all progress for this profile. Cannot be undone."):
         st.session_state.progress={1:False,2:False,3:False,4:False,5:False}
         st.session_state.scores={1:None,2:None,3:None,4:None,5:None}
         st.session_state.xp=0
@@ -1074,7 +1074,7 @@ st.markdown('<div class="hero-badge">🔍 Search</div>',unsafe_allow_html=True)
 st.title("Search Vocabulary")
 st.markdown("##### Search any word across all 5 levels instantly.")
 st.markdown('<hr class="divider">',unsafe_allow_html=True)
-search_query=st.text_input("Search for a word...",placeholder="e.g. deadline, however, confident...",key="search_input", help="Searches across word names, vocabulary categories, and flashcard definitions from all 5 levels.")
+search_query=st.text_input("Search for a word...",placeholder="e.g. deadline, however, confident...",key="search_input", help="Searches words, categories, and definitions across all 5 levels.")
 if search_query.strip():
     results=list({w:(w,c,l) for w,c,l in ALL_VOCAB if search_query.lower() in w.lower() or search_query.lower() in c.lower()}.values())
     if results:
@@ -1096,7 +1096,7 @@ st.markdown('<div class="hero-badge">🃏 Flashcards</div>',unsafe_allow_html=Tr
 st.title("Spaced Repetition Flashcards")
 st.markdown("##### Review the cards that are due today (this is how you remember words long-term).")
 st.markdown('<hr class="divider">',unsafe_allow_html=True)
-fc_level=st.selectbox("Choose a level",[1,2,3,4,5],format_func=lambda x:f"Level {x} — {level_meta[x-1][2]}",key="fc_level_select", help="Each level has its own set of 8 flashcards. Your review progress (ease, interval, due date) is tracked separately for each level.")
+fc_level=st.selectbox("Choose a level",[1,2,3,4,5],format_func=lambda x:f"Level {x} — {level_meta[x-1][2]}",key="fc_level_select", help="Each level has 8 flashcards with progress tracked separately.")
 profile = (st.session_state.get("profile_name") or "Guest").strip() or "Guest"
 cards=LEVEL_DATA[fc_level]["flashcards"]
 srs_seed_cards(profile, fc_level, cards)
@@ -1255,8 +1255,8 @@ st.markdown('<hr class="divider">',unsafe_allow_html=True)
 col_left,col_right=st.columns([2,1])
 with col_right:
     st.markdown("### Settings")
-    chat_level=st.selectbox("Your level",["Beginner (Level 1)","Elementary (Level 2)","Intermediate (Level 3)","Upper Intermediate (Level 4)","Advanced (Level 5)"],key="chat_level_select", help="Sets how the AI responds — simpler vocabulary and more patient corrections for lower levels, richer language and precise feedback for higher levels.")
-    scenario=st.selectbox("Practice scenario",["Free conversation","Job interview practice","Shopping at a store","Meeting someone new","Asking for directions","At a doctor's office","Calling customer service","Negotiating a salary","Resolving a complaint","Healthcare workplace","Restaurant service","Construction site"], help="The AI plays the other person in this scenario. Choose one that matches your real-life needs — job interview, store, etc.")
+    chat_level=st.selectbox("Your level",["Beginner (Level 1)","Elementary (Level 2)","Intermediate (Level 3)","Upper Intermediate (Level 4)","Advanced (Level 5)"],key="chat_level_select", help="Sets AI response complexity — simpler vocabulary for lower levels, richer language for higher levels.")
+    scenario=st.selectbox("Practice scenario",["Free conversation","Job interview practice","Shopping at a store","Meeting someone new","Asking for directions","At a doctor's office","Calling customer service","Negotiating a salary","Resolving a complaint","Healthcare workplace","Restaurant service","Construction site"], help="The AI plays the other person in your chosen scenario.")
     st.markdown(f'<div class="step-card" style="padding:14px 18px"><div class="step-label">How it works</div><div style="font-size:0.86rem;color:{muted};line-height:1.8">Type in English and the AI will:<br>✅ Respond naturally<br>✅ Correct any mistakes<br>✅ Explain why something is wrong<br>✅ Match your level</div></div>',unsafe_allow_html=True)
     if st.button("Clear Chat",key="clear_chat", help="Erase the entire conversation history and start a fresh practice session."): st.session_state.chat_messages=[]; st.rerun()
 with col_left:
